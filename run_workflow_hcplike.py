@@ -10,8 +10,7 @@ import os
 import sys
 import getopt
 
-from rui_diffusion_workflow import *
-#from workflow import *
+from workflow import *
 help_message = """
 Provides command line tools to build and work on workflow confiuration files,
 and for launching the pipeline using a specific config. You can either import
