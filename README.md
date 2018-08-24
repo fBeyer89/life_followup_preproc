@@ -12,4 +12,3 @@ Preprocessing pipelines for the LIFE-Adult Followup assessment (based on HCP pip
 + Creating a report for quick overview of the data.
 
 Based on the implementation of HCP pipelines for nipype (https://github.com/beOn/hcpre)
-
