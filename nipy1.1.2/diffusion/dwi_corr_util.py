@@ -16,13 +16,14 @@ from nipype.interfaces.base import (CommandLine,
                                     File, 
                                     TraitedSpec, 
                                     traits,
-                                    isdefined)
+                                    isdefined,
+                                    InputMultiPath)
 import os
 
 # warp the dwidenoise function from MRtrix
 class DWIdenoiseInputSpec(CommandLineInputSpec):
-    in_file = File(
-        exists=True, 
+    in_file = InputMultiPath(
+        File(exists=True), 
         mandatory=True,
         position=0,
         argstr="%s",
@@ -55,9 +56,8 @@ class DWIdenoise(CommandLine):
     input_spec = DWIdenoiseInputSpec
     output_spec = DWIdenoiseOutputSpec
 
-########################################
-# warp the unring function from MRtrix #
-########################################          
+
+# warp the unring function from MRtrix      
 class MRdegibbsInputSpec(CommandLineInputSpec):
     in_file = File(
         desc="input DWI image", 
@@ -90,9 +90,7 @@ class MRdegibbs(CommandLine):
     output_spec = MRdegibbsOutputSpec
 
 
-##################
-# Wrap FSL eddy #
-#################
+# Wrap FSL eddy (copy from nipype interface)
 class EddyInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,

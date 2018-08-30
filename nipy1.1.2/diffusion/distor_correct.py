@@ -12,9 +12,10 @@ Warp commands dwidenoise & mrdegibbs from MRTrix3.0; eddy-openmp from FSL
 for unkonwn reason they are not included after loading relavant interface
 '''
 from nipype import Node, Workflow
-from dwi_corr_util import MRdegibbs, DWIdenoise, Eddy
+from dwi_corr_util import (MRdegibbs, DWIdenoise, Eddy)
 from nipype.interfaces import fsl
 from nipype.interfaces import utility as util
+
 
 
 def create_distortion_correct():
@@ -61,7 +62,7 @@ def create_distortion_correct():
     unring = Node(MRdegibbs(), name="unring")
 
     ''
-    # topup and eddy
+    # topup and eddy #TODO: make acqparams and index files
     ''
     # merge AP PA files together
 
@@ -77,7 +78,7 @@ def create_distortion_correct():
 
     # topup
     topup = Node(fsl.TOPUP(), name='topup')
-    topup.inputs.config = "b02b0.cnf"
+    topup.inputs.config = "/data/pt_life_dti/scripts/life_FU/b02b0.cnf" #use optimised parameters
     topup.inputs.encoding_file = '/data/pt_life_dti/test/acqparams_dwi.txt'
     # topup.inputs.out_base = 'diff_topup'
     # --> Total readout time (FSL) = (number of echoes - 1) * echo spacing = (64-1)*0.78ms=49.14 ms #bcuz of GRAPPA
@@ -94,7 +95,7 @@ def create_distortion_correct():
 
     # eddy motion correction
     eddy = Node(Eddy(), name="eddy")
-    # eddy.inputs.num_threads = 8
+    eddy.inputs.num_threads = 8 #TODO: does not work for more than 8, but without defining here would only use one cpu, a fix?
     eddy.inputs.args = '--cnr_maps --residuals'
     eddy.inputs.repol = True
     eddy.inputs.in_acqp = '/data/pt_life_dti/test/acqparams_dwi.txt'
