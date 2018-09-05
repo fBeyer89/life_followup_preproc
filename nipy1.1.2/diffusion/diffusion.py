@@ -37,7 +37,15 @@ def create_dti():
         'dwi_denoised',
         "dwi_unringed",
         "eddy_corr",
-        'dti_fa'
+        'dti_fa',
+        'dti_md',
+        'dti_l1',
+        'dti_l2',
+        'dti_l3',
+        'dti_v1',
+        'dti_v2',
+        'dti_v3'
+        
     ]),
         name='outputnode')
 
@@ -46,11 +54,12 @@ def create_dti():
     ''
     distor_corr = create_distortion_correct()
 
-    ''
-    # upsampling
-    ''
-    flt = Node(fsl.FLIRT(), name='flirt')
-    flt.inputs.apply_isoxfm = 1
+    #''
+    ## upsampling
+    #''
+    #flirt = Node(fsl.FLIRT(), name='flirt')
+    #flirt.inputs.apply_isoxfm = 1
+    #TODO: to use this for dtifit, needed to creat another brain mask
 
     ''
     # tensor fitting
@@ -80,10 +89,18 @@ def create_dti():
         (distor_corr, outputnode, [('outputnode.eddy_corr', 'eddy_corr')]),
         (distor_corr, dti, [("outputnode.rotated_bvecs", "bvecs")]),
         (distor_corr, dti, [('outputnode.bo_brainmask', 'mask')]),
-        (distor_corr, flt, [('outputnode.eddy_corr', 'in_file')]),
-        (distor_corr, flt, [('outputnode.eddy_corr', 'reference')]),
-        (flt, dti, [('out_file', 'dwi')]),
-        (dti, outputnode, [('FA', 'dti_fa')])
+        #(distor_corr, flirt, [('outputnode.eddy_corr', 'in_file')]),
+        #(distor_corr, flirt, [('outputnode.eddy_corr', 'reference')]),
+        #(flirt, dti, [('out_file', 'dwi')]),
+        (distor_corr, dti, [('outputnode.eddy_corr', 'dwi')]),
+        (dti, outputnode, [('FA', 'dti_fa')]),
+        (dti, outputnode, [('MD', 'dti_md')]),
+        (dti, outputnode, [('L1', 'dti_l1')]),
+        (dti, outputnode, [('L2', 'dti_l2')]),
+        (dti, outputnode, [('L3', 'dti_l3')]),
+        (dti, outputnode, [('V1', 'dti_v1')]),
+        (dti, outputnode, [('V2', 'dti_v2')]),
+        (dti, outputnode, [('V3', 'dti_v3')])
 
     ])
 
