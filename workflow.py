@@ -126,17 +126,29 @@ class HCPrepWorkflow(pe.Workflow):
             (self.structural_wf, self.data_sink_rs, [('outputnode.anat2std_transforms', 'structural.@anat2std_transforms')]),
             (self.structural_wf, self.data_sink_rs, [('outputnode.std2anat_transforms', 'structural.@std2anat_transforms')]),
             
-            ##diffusion workflow
-            #(self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
-            #(self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
-            #(self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
-            #(self.nii_wrangler, self.dwi_wf, [("ep_dwi_echo_spacings", "inputnode.echo_space")]),
-            #(self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
-            #(self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
-            #(self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
-            #(self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
-            #(self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
-            #(self.dwi_wf, self.data_sink_dti, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
+            #diffusion workflow
+            (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
+            (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
+            (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
+            (self.nii_wrangler, self.dwi_wf, [("ep_dwi_echo_spacings", "inputnode.echo_space")]),
+            (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
+            (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
+            
+            (self.dwi_wf, self.data_sink, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.topup_corr', 'diffusion.@topup_corr')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.topup_field', 'diffusion.@topup_field')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
+	    (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_md', 'diffusion.@dti_md')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_l2', 'diffusion.@dti_l2')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_l3', 'diffusion.@dti_l3')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
                         
             #functional
             (self.subjects_node, self.resting, [("subject", "inputnode.subject")]),
@@ -278,15 +290,15 @@ class HCPrepWorkflow(pe.Workflow):
     def resting(self, val):
         self._resting = val
        
-    #@property
-    #def dwi_wf(self):
-        #from diffusion.diffusion import create_dti
-        #if not getattr(self,'_dwi_wf',None):
-            #self._dwi_wf = create_dti()
-        #return self._dwi_wf
-    #@dwi_wf.setter
-    #def dwi_wf(self, val):
-        #self._dwi_wf = val
+    @property
+    def dwi_wf(self):
+        from diffusion.diffusion import create_dti
+        if not getattr(self,'_dwi_wf',None):
+            self._dwi_wf = create_dti()
+        return self._dwi_wf
+    @dwi_wf.setter
+    def dwi_wf(self, val):
+        self._dwi_wf = val
    
     @property
     def report(self):

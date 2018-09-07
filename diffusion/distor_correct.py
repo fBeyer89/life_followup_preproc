@@ -95,7 +95,7 @@ def create_distortion_correct():
 
     # eddy motion correction
     eddy = Node(Eddy(), name="eddy")
-    eddy.inputs.num_threads = 8 #TODO: does not work for more than 8, but without defining here would only use one cpu, a fix?
+    eddy.inputs.num_threads = 24 #TODO: does not work for more than 8, but without defining here would only use one cpu, a fix?
     eddy.inputs.args = '--cnr_maps --residuals'
     eddy.inputs.repol = True
     eddy.inputs.in_acqp = '/data/pt_life_dti/test/acqparams_dwi.txt'
