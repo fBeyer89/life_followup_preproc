@@ -32,7 +32,7 @@ def create_resting():
     func_preproc = Workflow(name='resting')
     
     inputnode=Node(util.IdentityInterface(fields=
-    ['subject',
+    ['subject_id',
     'out_dir',
     'freesurfer_dir',
     'func',
@@ -65,9 +65,9 @@ def create_resting():
         return output_id
        
     #modify subject name so it can be saved in the same folder as other LIFE- freesurfer data
-    rename=Node(util.Function(input_names=['input_id'], 
-                            output_names=['output_id'],
-                            function = rename_subject_for_fu), name="rename")      
+    #rename=Node(util.Function(input_names=['input_id'], 
+    #                        output_names=['output_id'],
+    #                        function = rename_subject_for_fu), name="rename")      
     
     
     fmap_coreg=create_fmap_coreg_pipeline()
@@ -99,8 +99,7 @@ def create_resting():
     (remove_vol, moco, [('out_file', 'inputnode.epi')]),
     
     #prepare field map 
-    (inputnode, rename, [('subject','input_id')]),
-    (rename, fmap_coreg,[('output_id','inputnode.fs_subject_id')]),
+    (inputnode, fmap_coreg,[('subject_id','inputnode.fs_subject_id')]),
     (inputnode, fmap_coreg, [('fmap_phase', 'inputnode.phase'),
                              ('freesurfer_dir','inputnode.fs_subjects_dir'),                             
                              ('echo_space','inputnode.echo_space'),

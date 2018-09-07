@@ -132,7 +132,11 @@ class HCPrepWorkflow(pe.Workflow):
             
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.topup_corr', 'diffusion.@topup_corr')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.topup_field', 'diffusion.@topup_field')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
+	    (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_md', 'diffusion.@dti_md')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),

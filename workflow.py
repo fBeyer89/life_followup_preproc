@@ -39,13 +39,15 @@ class HCPrepWorkflow(pe.Workflow):
         out_dir = self.get_conf("general","out_dir")
         report_dir=self.get_conf("general","report_dir")
         standard = self.get_conf("templates","t1_template_2mm")  
-        outputdir_preprocessing=self.get_conf("general", "outputdir_preprocessing")
+        outputdir_dti=self.get_conf("general", "outputdir_dti")
+        outputdir_resting=self.get_conf("general", "outputdir_resting")
         vol_to_remove=self.get_conf("rspreproc","vol_to_remove")
         epi_resolution=self.get_conf("rspreproc","epi_resolution")
         ep_unwarp_dir=self.get_conf("rspreproc","ep_unwarp_dir")
         #working_dir = self.get_conf("general","working_dir")     
         if sub_dir:
             self.dicom_grabber.inputs.base_directory = sub_dir
+            self.data_sink.inputs.base_directory=sub_dir 
         if dcm_temp:
             self.dicom_grabber.inputs.field_template = {"dicom": dcm_temp}   
         if fs_dir:
@@ -62,13 +64,11 @@ class HCPrepWorkflow(pe.Workflow):
         if vol_to_remove:
             self.resting.inputs.inputnode.vol_to_remove=vol_to_remove
         if epi_resolution:
-            self.resting.inputs.inputnode.epi_resolution=epi_resolution
-        if subject_dir :
-	    self.data_sink.inputs.base_directory=subject_dir 
+            self.resting.inputs.inputnode.epi_resolution=epi_resolution           
         if outputdir_resting:
             self.data_sink_rs.inputs.base_directory=outputdir_resting
-	if outputdir_dti:
-	    self.data_sink_dti.inputs.base_directory=outputdir_dti
+        if outputdir_dti:
+            self.data_sink_dti.inputs.base_directory=outputdir_dti
         if ep_unwarp_dir:
             self.resting.inputs.inputnode.pe_dir=ep_unwarp_dir
                             
@@ -126,13 +126,18 @@ class HCPrepWorkflow(pe.Workflow):
             (self.structural_wf, self.data_sink_rs, [('outputnode.anat2std_transforms', 'structural.@anat2std_transforms')]),
             (self.structural_wf, self.data_sink_rs, [('outputnode.std2anat_transforms', 'structural.@std2anat_transforms')]),
             
+<<<<<<< HEAD
             #diffusion workflow
+=======
+            ##diffusion workflow
+>>>>>>> c911956fdb18b30cebb2459483b82f933366a26e
             (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
             (self.nii_wrangler, self.dwi_wf, [("ep_dwi_echo_spacings", "inputnode.echo_space")]),
             (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
             (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
+<<<<<<< HEAD
             
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
@@ -149,9 +154,15 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
+=======
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
+>>>>>>> c911956fdb18b30cebb2459483b82f933366a26e
                         
             #functional
-            (self.subjects_node, self.resting, [("subject", "inputnode.subject")]),
+            (self.structural_wf, self.resting, [("outputnode.subject_id", "inputnode.subject_id")]),
             (self.nii_wrangler, self.resting, [("rsfmri", "inputnode.func")]),    
             (self.nii_wrangler, self.resting, [("mag_fieldmap", "inputnode.fmap_mag")]), 
             (self.nii_wrangler, self.resting, [("phase_fieldmap", "inputnode.fmap_phase")]),
