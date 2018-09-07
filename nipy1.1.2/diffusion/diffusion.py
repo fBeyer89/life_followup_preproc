@@ -59,7 +59,7 @@ def create_dti():
     distor_corr = create_distortion_correct()
 
     #''
-    ## upsampling
+    ## upsampling #TODO: upsample with eddy directly, waiting for Alfred for the method
     #''
     #flirt = Node(fsl.FLIRT(), name='flirt')
     #flirt.inputs.apply_isoxfm = 1
@@ -80,8 +80,6 @@ def create_dti():
         (inputnode, distor_corr, [('dwi', 'inputnode.dwi')]),
         (inputnode, distor_corr, [('dwi_ap', 'inputnode.dwi_ap')]),
         (inputnode, distor_corr, [('dwi_pa', 'inputnode.dwi_pa')]),
-        # (inputnode, distor_corr, [("dwi_index", "inputnode.dwi_index")]),
-        # (inputnode, distor_corr, [("acqparams_dwi", "inputnode.acqparams_dwi")]),
         (inputnode, distor_corr, [("bvals", "inputnode.bvals")]),
         (inputnode, distor_corr, [("bvecs", "inputnode.bvecs")]),
         (inputnode, dti, [("bvals", "bvals")]),
