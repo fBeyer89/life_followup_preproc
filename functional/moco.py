@@ -8,7 +8,7 @@ Created on Mon Feb  9 12:32:17 2015
 from nipype.pipeline.engine import MapNode, Node, Workflow
 import nipype.interfaces.utility as util
 import nipype.interfaces.fsl as fsl
-import nipype.algorithms.misc as misc
+import nipype.algorithms.confounds as confounds
 '''
 Workflow for motion correction to 1st volume and tSNR
 '''
@@ -59,7 +59,7 @@ def create_moco_pipeline(name='motion_correction'):
     out_file='rest_realigned_mean.nii.gz'),
     name='tmean')
     # calculate tsnr
-    tsnr = Node(misc.TSNR(),
+    tsnr = Node(confounds.TSNR(),
     name='tsnr')
     # create connections
     moco.connect([(inputnode, mcflirt, [('epi', 'in_file')]),

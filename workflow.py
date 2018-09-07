@@ -126,18 +126,14 @@ class HCPrepWorkflow(pe.Workflow):
             (self.structural_wf, self.data_sink_rs, [('outputnode.anat2std_transforms', 'structural.@anat2std_transforms')]),
             (self.structural_wf, self.data_sink_rs, [('outputnode.std2anat_transforms', 'structural.@std2anat_transforms')]),
             
-<<<<<<< HEAD
             #diffusion workflow
-=======
-            ##diffusion workflow
->>>>>>> c911956fdb18b30cebb2459483b82f933366a26e
+
             (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
             (self.nii_wrangler, self.dwi_wf, [("ep_dwi_echo_spacings", "inputnode.echo_space")]),
             (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
             (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
-<<<<<<< HEAD
             
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
@@ -145,7 +141,7 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dwi_wf, self.data_sink, [('outputnode.topup_field', 'diffusion.@topup_field')]),
             (self.dwi_wf, self.data_sink, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
             (self.dwi_wf, self.data_sink, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
-	    (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_md', 'diffusion.@dti_md')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),
@@ -154,12 +150,11 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
-=======
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
->>>>>>> c911956fdb18b30cebb2459483b82f933366a26e
+
                         
             #functional
             (self.structural_wf, self.resting, [("outputnode.subject_id", "inputnode.subject_id")]),
