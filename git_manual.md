@@ -10,7 +10,7 @@
 
 ### After making changes
 
-- Commit changes: `git commit -a -m YOUR-CHANGES` or `git commit 'file-name' -m YOURCHANGES` if you want to comment the changes differently for each file. Note if you forgot to use `-m 'comments'`, you will open a commit text editor in your terminal, type your comments and ^KX to save and exit (^KH for help).
+- Commit changes: `git commit -a -m YOUR-CHANGES` to give the same commit to all files or `git commit FILE-NAME -m YOURCHANGES` if you want to comment the changes differently for each file. Note if you forgot to use `-m YOURCHANGES`, you will open a commit text editor in your terminal, type your comments and ^KX to save and exit (^KH for help).
 - Push changes: `git push origin YOUR-BRANCH-NAME`
 - Open a pull request (from the browser)
 - Owner of the repository aprove the pull request
