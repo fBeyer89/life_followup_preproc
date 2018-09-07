@@ -139,28 +139,6 @@ def main(argv=None):
             return
         if not run:
             return
-        if use_pbs:
-            print "running using PBS"
-            # note - the default qsub args are very modest. use this structure
-            # to scale up if necessary.
-            ques = [
-                [[wk.dicom_convert, wk.dicom_info, wk.nii_wrangler],
-                    {"qsub_args":"-l nodes=1:ppn=1,mem=1gb,walltime=1:00:00"}],
-                [[wk.hc_pre_fs],
-                    {"qsub_args":"-l nodes=1:ppn=2,mem=10gb,vmem=10gb,walltime=6:00:00"}],
-                [[wk.hc_fs],
-                    {"qsub_args":"-l nodes=1:ppn=2,mem=5gb,walltime=24:00:00"}],
-                [[wk.hc_post_fs],
-                    {"qsub_args":"-l nodes=1:ppn=4,mem=10gb,walltime=4:00:00"}],
-                [[wk.hc_volume, wk.hc_surface],
-                    {"qsub_args":"-l nodes=1:ppn=4,mem=10gb,walltime=12:00:00"}],
-                ]
-            for q in ques:
-                p_args = dict(q[1],**{"overwrite":True})
-                for n in q[0]:
-                    n.plugin_args = p_args
-            wk.run(plugin="PBS",
-                   plugin_args={"qsub_args":"-l nodes=1:ppn=1,mem=1gb,walltime=1:00:00"})
         elif N_PROCS > 0:
             print "running with %d processes" % N_PROCS
             wk.run(plugin="MultiProc", plugin_args={"n_procs" : N_PROCS, "non_daemon" : True})

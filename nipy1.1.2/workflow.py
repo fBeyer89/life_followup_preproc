@@ -35,7 +35,7 @@ class HCPrepWorkflow(pe.Workflow):
         # dcm grabber
         sub_dir = self.get_conf("general","subject_dir")
         dcm_temp = self.get_conf("general","dicom_template")    
-        fs_dir = "/data/pt_life_dti/test/freesurfer_all/" 
+        fs_dir = "/data/pt_life_dti/test/freesurfer_all" 
         out_dir = self.get_conf("general","out_dir")
         #report_dir=self.get_conf("general","report_dir")
         standard = self.get_conf("templates","t1_template_2mm")  
