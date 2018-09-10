@@ -123,12 +123,14 @@ class HCPrepWorkflow(pe.Workflow):
             (self.structural_wf, self.data_sink, [('outputnode.std2anat_transforms', 'structural.@std2anat_transforms')]),
             
             #diffusion workflow
+            (self.structural_wf, self.dwi_wf, [("outputnode.subject_id", "inputnode.subject_id")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
             (self.nii_wrangler, self.dwi_wf, [("ep_dwi_echo_spacings", "inputnode.echo_space")]),
             (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
             (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
+            (self.structural_wf, self.dwi_wf, [('outputnode.anat_head', 'inputnode.anat_head')]),
             
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
