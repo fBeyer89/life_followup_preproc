@@ -14,8 +14,6 @@ from nipype import Node, Workflow
 from distor_correct import create_distortion_correct
 from nipype.interfaces import fsl
 from nipype.interfaces.utility import IdentityInterface
-import nipype.interfaces.freesurfer as fs
-
 
 def create_dti():
     # main workflow for preprocessing diffusion data
@@ -111,35 +109,6 @@ def create_dti():
 
     ])
     
-        ''
-    # registration of FA to T1 FREESURFER output (BBregister)
-    ''
-    # linear registration with bbregister
-    bbreg = Node(fs.BBRegister(contrast_type='t1',
-    out_fsl_file='dti2anat.mat',
-    out_reg_file='dti2anat.dat',
-    registered_file='dti2anat_bbreg.nii.gz',
-    init='fsl'
-    ),
-    name='bbregister')
-    
-    # echo " - apply the inverse of the matrix from aseg.mgz to diffusion"
-# mri_vol2vol --mov  $results_dir/$subj/${subj}_fa.nii.gz --targ ${free_dir}/$subj/mri/aseg.mgz --o $results_dir/$subj/rois/aseg.nii.gz --reg $results_dir/$subj/rois/bbregister_fa_2_orig_bbr.dat --inv --nearest
-    applyreg = fs.ApplyVolTransform()
-    applyreg.inputs.source_file = 'structural.nii'
-    applyreg.inputs.reg_file = 'register.dat'
-    applyreg.inputs.transformed_file = 'struct_warped.nii'
-    applyreg.inputs.fs_target = True
-
-    dwi_preproc.connect([
-        (dti, bbreg, [('FA', 'source_file')]),
-        (inputnode, bbreg, [('freesurfer_dir', 'subjects_dir'),
-                            ('subject_id', 'subject_id')]),
-        (bbreg, outputnode, [('out_fsl_file', 'epi2anat_mat'),
-                             ('out_reg_file', 'epi2anat_dat'),
-                             ('registered_file', 'epi2anat'),
-                             ('min_cost_file', 'epi2anat_mincost')
-                            ])
-    ])
+ 
 
     return dwi_preproc
