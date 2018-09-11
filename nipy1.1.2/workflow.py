@@ -146,6 +146,9 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.fa2anat', 'diffusion.@fa2anat')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.fa2anat_mat', 'diffusion.@fa2anat_mat')]),
+            (self.dwi_wf, self.data_sink, [('outputnode.dti_v3', 'diffusion.@fa2anat_dat')]),
 
             #functional
             (self.subjects_node, self.resting, [("subject", "inputnode.subject")]),
