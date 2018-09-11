@@ -34,23 +34,24 @@ class HCPrepWorkflow(pe.Workflow):
             self.subjects_node.iterables = ("subject", subs)
         # dcm grabber
         sub_dir = self.get_conf("general","subject_dir")
-        dcm_temp = self.get_conf("general","dicom_template")    
-        fs_dir = "/data/pt_life_dti/test/freesurfer_all" 
+        dcm_temp = self.get_conf("general","dicom_template")
+        fs_dir = "/data/pt_life_dti/test/freesurfer_all"
         out_dir = self.get_conf("general","out_dir")
         #report_dir=self.get_conf("general","report_dir")
-        standard = self.get_conf("templates","t1_template_2mm")  
+        standard = self.get_conf("templates","t1_template_2mm")
         outputdir_preprocessing=self.get_conf("general", "outputdir_preprocessing")
         vol_to_remove=self.get_conf("rspreproc","vol_to_remove")
         epi_resolution=self.get_conf("rspreproc","epi_resolution")
         ep_unwarp_dir=self.get_conf("rspreproc","ep_unwarp_dir")
-        #working_dir = self.get_conf("general","working_dir")     
+        #working_dir = self.get_conf("general","working_dir")
         if sub_dir:
             self.dicom_grabber.inputs.base_directory = sub_dir
         if dcm_temp:
-            self.dicom_grabber.inputs.field_template = {"dicom": dcm_temp}   
+            self.dicom_grabber.inputs.field_template = {"dicom": dcm_temp}
         if fs_dir:
             self.structural_wf.inputs.inputnode.freesurfer_dir=fs_dir
             self.resting.inputs.inputnode.freesurfer_dir=fs_dir
+            self.dwi_wf.inputs.inputnode.freesurfer_dir=fs_dir
             #self.report.inputs.inputnode.freesurfer_dir=fs_dir
         if out_dir:
             self.structural_wf.inputs.inputnode.out_dir=out_dir
@@ -58,7 +59,7 @@ class HCPrepWorkflow(pe.Workflow):
         #if report_dir:
             #self.report.inputs.inputnode.out_dir=report_dir
         if standard:
-            self.structural_wf.inputs.inputnode.standard_brain=standard  
+            self.structural_wf.inputs.inputnode.standard_brain=standard
         if vol_to_remove:
             self.resting.inputs.inputnode.vol_to_remove=vol_to_remove
         if epi_resolution:
@@ -67,7 +68,7 @@ class HCPrepWorkflow(pe.Workflow):
             self.data_sink.inputs.base_directory=outputdir_preprocessing
         if ep_unwarp_dir:
             self.resting.inputs.inputnode.pe_dir=ep_unwarp_dir
-                            
+
         # nifti wrangler
         series_map = self.hc_config.get("series", {})
         if series_map:
@@ -85,7 +86,7 @@ class HCPrepWorkflow(pe.Workflow):
     def write_graph(self, *args, **kwargs):
         self.connect_nodes()
         super(HCPrepWorkflow, self).write_graph(*args, **kwargs)
-        
+
     def clear_nodes(self):
         all_nodes = self._get_all_nodes()
         if all_nodes is not None:
@@ -103,14 +104,14 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dicom_convert, self.data_sink, [("bvals", "nifti.@bval")]),
             (self.dicom_convert, self.data_sink, [("bvecs", "nifti.@bvecs")]),
             (self.dicom_info, self.nii_wrangler, [("info", "dicom_info")]),
-            (self.nii_wrangler, self.data_sink, [("t1", "nifti.@t1")]), 
-            (self.nii_wrangler, self.data_sink, [("rsfmri", "nifti.@rsfmri")]), 
-            (self.nii_wrangler, self.data_sink, [("mag_fieldmap", "nifti.@mag_fieldmap")]),       
-            (self.nii_wrangler, self.data_sink, [("phase_fieldmap", "nifti.@phase_fieldmap")]),    
-            (self.nii_wrangler, self.data_sink, [("dwi", "nifti.@dwi")]), 
+            (self.nii_wrangler, self.data_sink, [("t1", "nifti.@t1")]),
+            (self.nii_wrangler, self.data_sink, [("rsfmri", "nifti.@rsfmri")]),
+            (self.nii_wrangler, self.data_sink, [("mag_fieldmap", "nifti.@mag_fieldmap")]),
+            (self.nii_wrangler, self.data_sink, [("phase_fieldmap", "nifti.@phase_fieldmap")]),
+            (self.nii_wrangler, self.data_sink, [("dwi", "nifti.@dwi")]),
             (self.nii_wrangler, self.data_sink, [("flair", "nifti.@flair")]),
-            (self.nii_wrangler, self.data_sink, [("dwi_ap", "nifti.@dwi_ap")]),  
-            (self.nii_wrangler, self.data_sink, [("dwi_pa", "nifti.@dwi_pa")]), 
+            (self.nii_wrangler, self.data_sink, [("dwi_ap", "nifti.@dwi_ap")]),
+            (self.nii_wrangler, self.data_sink, [("dwi_pa", "nifti.@dwi_pa")]),
 
             #structural workflow
             (self.nii_wrangler, self.structural_wf, [("t1", "inputnode.anat")]),
@@ -121,24 +122,23 @@ class HCPrepWorkflow(pe.Workflow):
             (self.structural_wf, self.data_sink, [('outputnode.anat2std', 'structural.@anat2std')]),
             (self.structural_wf, self.data_sink, [('outputnode.anat2std_transforms', 'structural.@anat2std_transforms')]),
             (self.structural_wf, self.data_sink, [('outputnode.std2anat_transforms', 'structural.@std2anat_transforms')]),
-            
+
             #diffusion workflow
-            (self.structural_wf, self.dwi_wf, [("outputnode.subject_id", "inputnode.subject_id")]),
+            (self.subjects_node, self.dwi_wf, [("subject", "inputnode.subject_id")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
             (self.nii_wrangler, self.dwi_wf, [("ep_dwi_echo_spacings", "inputnode.echo_space")]),
             (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
             (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
-            (self.structural_wf, self.dwi_wf, [('outputnode.anat_head', 'inputnode.anat_head')]),
-            
+
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
             (self.dwi_wf, self.data_sink, [('outputnode.topup_corr', 'diffusion.@topup_corr')]),
             (self.dwi_wf, self.data_sink, [('outputnode.topup_field', 'diffusion.@topup_field')]),
             (self.dwi_wf, self.data_sink, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
             (self.dwi_wf, self.data_sink, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
-	    (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
+	        (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_md', 'diffusion.@dti_md')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),
@@ -147,7 +147,7 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
             (self.dwi_wf, self.data_sink, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
-                        
+
             #functional
             (self.subjects_node, self.resting, [("subject", "inputnode.subject")]),
             (self.nii_wrangler, self.resting, [("rsfmri", "inputnode.func")]),
@@ -158,7 +158,7 @@ class HCPrepWorkflow(pe.Workflow):
             (self.structural_wf, self.resting, [('outputnode.brainmask', 'inputnode.anat_brain_mask')]),
             (self.nii_wrangler, self.resting, [("fieldmap_te", "inputnode.te_diff")]),
             (self.nii_wrangler, self.resting, [("ep_rsfmri_echo_spacings", "inputnode.echo_space")]),
-            (self.nii_wrangler, self.resting, [("ep_TR", "inputnode.TR")]),          
+            (self.nii_wrangler, self.resting, [("ep_TR", "inputnode.TR")]),
             #sink
             (self.resting,self.data_sink, [('outputnode.tsnr','resting.moco.@tsnr_file')]),
             (self.resting,self.data_sink, [('outputnode.par','resting.moco.@realignment_parameters_file')]),
@@ -190,12 +190,12 @@ class HCPrepWorkflow(pe.Workflow):
             #(self.structural_wf, self.report, [('outputnode.wmseg','inputnode.wm_file')]),
             #(self.structural_wf, self.report, [('outputnode.brainmask','inputnode.brain_mask')]),
             #(self.structural_wf, self.report, [('outputnode.anat_head','inputnode.T1')])
-            
-     
+
+
             ])
 
     """ self-inflating nodes """
-    
+
     @property
     def subjects_node(self):
         if not getattr(self,"_subjects_node",None):
@@ -267,7 +267,7 @@ class HCPrepWorkflow(pe.Workflow):
     @nii_wrangler.setter
     def nii_wrangler(self, val):
         self._nii_wrangler = val
-        
+
     @property
     def structural_wf(self):
         from structural.structural import create_structural
@@ -287,7 +287,7 @@ class HCPrepWorkflow(pe.Workflow):
     @resting.setter
     def resting(self, val):
         self._resting = val
-       
+
     @property
     def dwi_wf(self):
         from diffusion.diffusion import create_dti
@@ -297,7 +297,7 @@ class HCPrepWorkflow(pe.Workflow):
     @dwi_wf.setter
     def dwi_wf(self, val):
         self._dwi_wf = val
-   
+
     #@property
     #def report(self):
         #from reports.generate_base_report import create_base_report
@@ -307,7 +307,7 @@ class HCPrepWorkflow(pe.Workflow):
     #@report.setter
     #def report(self, val):
         #self._report = val
-        
+
     @property
     def data_sink(self):
         if not getattr(self,'_data_sink',None):

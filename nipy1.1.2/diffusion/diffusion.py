@@ -14,6 +14,7 @@ from nipype import Node, Workflow
 from distor_correct import create_distortion_correct
 from nipype.interfaces import fsl
 from nipype.interfaces.utility import IdentityInterface
+import nipype.interfaces.freesurfer as fs
 
 def create_dti():
     # main workflow for preprocessing diffusion data
@@ -25,12 +26,12 @@ def create_dti():
     inputnode = Node(IdentityInterface(fields=[
         'subject_id',
         'freesurfer_dir',
+        'aseg',
         'dwi',
         'dwi_ap',
         'dwi_pa',
         'bvals',
-        'bvecs',
-        'echo_space'
+        'bvecs'
     ]),
         name='inputnode')
     # output node
@@ -49,14 +50,17 @@ def create_dti():
         'dti_l3',
         'dti_v1',
         'dti_v2',
-        'dti_v3'
-        
+        'dti_v3',
+        'fa2anat',
+        'fa2anat_mat',
+        'fa2anat_dat'
     ]),
         name='outputnode')
 
-    ''
-    # workflow to run distortion correction
-    ''
+    '''
+    workflow to run distortion correction
+    -------------------------------------
+    '''
     distor_corr = create_distortion_correct()
 
     #''
@@ -66,14 +70,13 @@ def create_dti():
     #flirt.inputs.apply_isoxfm = 1
     #TODO: to use this for dtifit, needed to creat another brain mask
 
-    ''
-    # tensor fitting
-    ''
+    '''
+    tensor fitting
+    --------------
+    '''
     dti = Node(fsl.DTIFit(), name='dti')
 
-    ''
-    # connecting the nodes
-    ''
+    #connecting the nodes
     dwi_preproc.connect([
 
         (inputnode, distor_corr, [('dwi', 'inputnode.dwi')]),
@@ -108,7 +111,30 @@ def create_dti():
         (dti, outputnode, [('V3', 'dti_v3')])
 
     ])
-    
- 
+
+    '''
+    coregistration of FA and T1
+    ------------------------------------
+    '''
+    # linear registration with bbregister
+    bbreg = Node(fs.BBRegister(contrast_type='t1',
+    out_fsl_file='fa2anat.mat',
+    out_reg_file='fa2anat.dat',
+    registered_file='fa2anat_bbreg.nii.gz',
+    init='fsl'
+    ),
+    name='bbregister')
+
+    # connecting the nodes
+    dwi_preproc.connect([
+
+        (inputnode, bbreg, [('freesurfer_dir', 'subjects_dir'),
+                            ('subject_id', 'subject_id')]),
+        (dti, bbreg, [("FA", "source_file")]),
+        (bbreg, outputnode, [('out_fsl_file', 'fa2anat_mat'),
+                             ('out_reg_file', 'fa2anat_dat'),
+                             ('registered_file', 'fa2anat')])
+
+    ])
 
     return dwi_preproc
