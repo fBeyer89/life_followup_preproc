@@ -15,6 +15,7 @@ from distor_correct import create_distortion_correct
 from nipype.interfaces import fsl
 from nipype.interfaces.utility import IdentityInterface
 import nipype.interfaces.freesurfer as fs
+import nipype.interfaces.utility as util
 
 def create_dti():
     # main workflow for preprocessing diffusion data
