@@ -24,6 +24,7 @@ Branch is quite complicated, what I knew so far:
 
 
 ### Clean up after a merged pull request
+- Switch your branch back to master: `git checkout master`
 - Updating your local copy from original repo to keep up with their changes: `git pull upstream master`
 - Delete the feature branch in which chages have been updated `git branch -d BRANCH-NAME`
 - Update the master branch in your forked repository `git push origin master`
