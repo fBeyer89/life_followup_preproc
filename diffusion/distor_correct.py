@@ -29,8 +29,7 @@ def create_distortion_correct():
         'dwi_ap',
         'dwi_pa',
         'bvals',
-        'bvecs',
-        'echo_space'
+        'bvecs'
     ]),
         name='inputnode')
     # output node
@@ -52,7 +51,7 @@ def create_distortion_correct():
 
     # to define the path in the current directory
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-    
+
     ''
     # noise reduction on all images
     ''
