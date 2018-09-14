@@ -18,3 +18,5 @@ MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FREESURFER --version 
 
 To run it do:
 python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf 
+
+working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)

@@ -48,6 +48,7 @@ class HCPrepWorkflow(pe.Workflow):
         if sub_dir:
             self.dicom_grabber.inputs.base_directory = sub_dir
             self.data_sink.inputs.base_directory=sub_dir 
+            self.data_sink.inputs.substitutions=[('_subject_', '')]
         if dcm_temp:
             self.dicom_grabber.inputs.field_template = {"dicom": dcm_temp}   
         if fs_dir:
@@ -67,8 +68,10 @@ class HCPrepWorkflow(pe.Workflow):
             self.resting.inputs.inputnode.epi_resolution=epi_resolution           
         if outputdir_resting:
             self.data_sink_rs.inputs.base_directory=outputdir_resting
+            self.data_sink_rs.inputs.substitutions=[('_subject_', '')]
         if outputdir_dti:
             self.data_sink_dti.inputs.base_directory=outputdir_dti
+            self.data_sink_dti.inputs.substitutions=[('_subject_', '')]
         if ep_unwarp_dir:
             self.resting.inputs.inputnode.pe_dir=ep_unwarp_dir
                             
@@ -104,17 +107,17 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dicom_grabber, self.dicom_convert, [("dicom", "source_names")]),
             (self.dicom_grabber, self.dicom_info, [("dicom", "files")]),
             (self.dicom_convert, self.nii_wrangler, [("converted_files", "nii_files")]),
-            (self.dicom_convert, self.data_sink, [("bvals", "nifti.@bval")]),
-            (self.dicom_convert, self.data_sink, [("bvecs", "nifti.@bvecs")]),
+            (self.dicom_convert, self.data_sink, [("bvals", "nifti_fu.@bval")]),
+            (self.dicom_convert, self.data_sink, [("bvecs", "nifti_fu.@bvecs")]),
             (self.dicom_info, self.nii_wrangler, [("info", "dicom_info")]),
-            (self.nii_wrangler, self.data_sink, [("t1", "nifti.@t1")]), 
-            (self.nii_wrangler, self.data_sink, [("rsfmri", "nifti.@rsfmri")]), 
-            (self.nii_wrangler, self.data_sink, [("mag_fieldmap", "nifti.@mag_fieldmap")]),       
-            (self.nii_wrangler, self.data_sink, [("phase_fieldmap", "nifti.@phase_fieldmap")]),    
-            (self.nii_wrangler, self.data_sink, [("dwi", "nifti.@dwi")]), 
-            (self.nii_wrangler, self.data_sink, [("flair", "nifti.@flair")]),
-            (self.nii_wrangler, self.data_sink, [("dwi_ap", "nifti.@dwi_ap")]),  
-            (self.nii_wrangler, self.data_sink, [("dwi_pa", "nifti.@dwi_pa")]), 
+            (self.nii_wrangler, self.data_sink, [("t1", "nifti_fu.@t1")]), 
+            (self.nii_wrangler, self.data_sink, [("rsfmri", "nifti_fu.@rsfmri")]), 
+            (self.nii_wrangler, self.data_sink, [("mag_fieldmap", "nifti_fu.@mag_fieldmap")]),       
+            (self.nii_wrangler, self.data_sink, [("phase_fieldmap", "nifti_fu.@phase_fieldmap")]),    
+            (self.nii_wrangler, self.data_sink, [("dwi", "nifti_fu.@dwi")]), 
+            (self.nii_wrangler, self.data_sink, [("flair", "nifti_fu.@flair")]),
+            (self.nii_wrangler, self.data_sink, [("dwi_ap", "nifti_fu.@dwi_ap")]),  
+            (self.nii_wrangler, self.data_sink, [("dwi_pa", "nifti_fu.@dwi_pa")]), 
 
             #structural workflow
             (self.nii_wrangler, self.structural_wf, [("t1", "inputnode.anat")]),          
@@ -135,25 +138,21 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
             (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
             
-            (self.dwi_wf, self.data_sink, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.topup_corr', 'diffusion.@topup_corr')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.topup_field', 'diffusion.@topup_field')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_md', 'diffusion.@dti_md')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_l2', 'diffusion.@dti_l2')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_l3', 'diffusion.@dti_l3')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
-            (self.dwi_wf, self.data_sink, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_corr', 'diffusion.@topup_corr')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_field', 'diffusion.@topup_field')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_md', 'diffusion.@dti_md')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l2', 'diffusion.@dti_l2')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l3', 'diffusion.@dti_l3')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
 
                         
             #functional
