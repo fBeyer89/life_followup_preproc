@@ -15,7 +15,7 @@ from nipype import Node, Workflow
 from dwi_corr_util import (MRdegibbs, DWIdenoise, Eddy)
 from nipype.interfaces import fsl
 from nipype.interfaces import utility as util
-
+import os
 
 
 def create_distortion_correct():
@@ -29,8 +29,7 @@ def create_distortion_correct():
         'dwi_ap',
         'dwi_pa',
         'bvals',
-        'bvecs',
-        'echo_space'
+        'bvecs'
     ]),
         name='inputnode')
     # output node
@@ -50,6 +49,9 @@ def create_distortion_correct():
     ]),
         name='outputnode')
 
+    # to define the path in the current directory
+    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
     ''
     # noise reduction on all images
     ''
@@ -62,7 +64,7 @@ def create_distortion_correct():
     unring = Node(MRdegibbs(), name="unring")
 
     ''
-    # topup and eddy #TODO: make acqparams and index files
+    # topup and eddy
     ''
     # merge AP PA files together
 
@@ -77,11 +79,13 @@ def create_distortion_correct():
     ])
 
     # topup
+    config = os.path.join(__location__, 'b02b0.cnf')
+    acqparams = os.path.join(__location__, 'acqparams_dwi.txt')
     topup = Node(fsl.TOPUP(), name='topup')
-    topup.inputs.config = "/data/pt_life_dti/scripts/life_FU/b02b0.cnf" #use optimised parameters
-    topup.inputs.encoding_file = '/data/pt_life_dti/test/acqparams_dwi.txt'
+    topup.inputs.config = config #use optimised parameters
+    topup.inputs.encoding_file = acqparams
     # topup.inputs.out_base = 'diff_topup'
-    # --> Total readout time (FSL) = (number of echoes - 1) * echo spacing = (64-1)*0.78ms=49.14 ms #bcuz of GRAPPA
+
 
     # skullstrip process using bet
     # mean of all b0 unwarped images
@@ -94,12 +98,13 @@ def create_distortion_correct():
     bet.inputs.robust = True
 
     # eddy motion correction
+    indx = os.path.join(__location__, 'index.txt')
     eddy = Node(Eddy(), name="eddy")
-    eddy.inputs.num_threads = 24 #TODO: does not work for more than 8, but without defining here would only use one cpu, a fix?
+    eddy.inputs.num_threads = 8 ## total number of CPUs to use
     eddy.inputs.args = '--cnr_maps --residuals'
     eddy.inputs.repol = True
-    eddy.inputs.in_acqp = '/data/pt_life_dti/test/acqparams_dwi.txt'
-    eddy.inputs.in_index = '/data/pt_life_dti/test/index.txt'
+    eddy.inputs.in_acqp = acqparams
+    eddy.inputs.in_index = indx
 
     ''
     # connect the nodes
