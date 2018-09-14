@@ -53,6 +53,7 @@ class HCPrepWorkflow(pe.Workflow):
         if fs_dir:
             self.structural_wf.inputs.inputnode.freesurfer_dir=fs_dir
             self.resting.inputs.inputnode.freesurfer_dir=fs_dir
+            self.dwi_wf.inputs.inputnode.freesurfer_dir=fs_dir
             self.report.inputs.inputnode.freesurfer_dir=fs_dir
         if out_dir:
             self.structural_wf.inputs.inputnode.out_dir=out_dir
@@ -127,11 +128,10 @@ class HCPrepWorkflow(pe.Workflow):
             (self.structural_wf, self.data_sink_rs, [('outputnode.std2anat_transforms', 'structural.@std2anat_transforms')]),
             
             #diffusion workflow
-
+            (self.subjects_node, self.dwi_wf, [("subject", "inputnode.subject_id")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
-            (self.nii_wrangler, self.dwi_wf, [("ep_dwi_echo_spacings", "inputnode.echo_space")]),
             (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
             (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
             
@@ -150,6 +150,9 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
             (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat', 'diffusion.@fa2anat')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat_mat', 'diffusion.@fa2anat_mat')]),
+            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v3', 'diffusion.@fa2anat_dat')]),
 
                         
             #functional
