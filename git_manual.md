@@ -24,10 +24,13 @@ Branch is quite complicated, what I knew so far:
 
 
 ### Clean up after a merged pull request
+- Switch your branch back to master: `git checkout master`
 - Updating your local copy from original repo to keep up with their changes: `git pull upstream master`
 - Delete the feature branch in which chages have been updated `git branch -d BRANCH-NAME`
+  - note: you usually get a warning `error: The branch X is not fully merged.`; It means the branch you are about to delete contains commits that are not reachable from any of: its upstream branch, or HEAD (currently checked out revision). In other words, when you might lose commits. 
+  - solution: just force the deletion with -D option if you are sure about the changes.
 - Update the master branch in your forked repository `git push origin master`
-- (TODO:testing) Push the deletion of the branch to your GitHub: `git push --delete origin BRANCH-NAME`
+- Push the deletion of the branch to your GitHub: `git push --delete origin BRANCH-NAME`
 
 ## Some useful commands
 - to see the current status of the files that needed to be commit, push or add...
