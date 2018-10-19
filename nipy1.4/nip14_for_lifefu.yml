@@ -1,0 +1,212 @@
+name: nip14_lifefu
+channels: !!python/object/new:ruamel_yaml.comments.CommentedSeq
+  listitems:
+  - conda-forge
+  - defaults
+  state:
+    _yaml_format: !!python/object:ruamel_yaml.comments.Format
+      _flow_style: false
+    _yaml_line_col: !!python/object:ruamel_yaml.comments.LineCol
+      col: 2
+      data:
+        0:
+        - 1
+        - 4
+        1:
+        - 2
+        - 4
+      line: 1
+dependencies:
+- blas=1.0=mkl
+- conda-forge::attrs=17.4.0=py_0
+- conda-forge::backports=1.0=py27_1
+- conda-forge::backports.functools_lru_cache=1.4=py27_1
+- conda-forge::backports.shutil_get_terminal_size=1.0.0=py_3
+- conda-forge::backports_abc=0.5=py27_0
+- conda-forge::blosc=1.14.4=hfc679d8_0
+- conda-forge::bzip2=1.0.6=h470a237_2
+- conda-forge::ca-certificates=2017.11.5=0
+- conda-forge::certifi=2017.11.5=py27_0
+- conda-forge::click=6.7=py27_0
+- conda-forge::configparser=3.5.0=py27_0
+- conda-forge::cycler=0.10.0=py27_0
+- conda-forge::dbus=1.10.22=0
+- conda-forge::decorator=4.1.2=py27_0
+- conda-forge::dipy=0.14.0=py27h7eb728f_1
+- conda-forge::enum34=1.1.6=py27_1
+- conda-forge::expat=2.2.5=0
+- conda-forge::fastcache=1.0.2=py27h470a237_1
+- conda-forge::fontconfig=2.12.6=0
+- conda-forge::freetype=2.8.1=0
+- conda-forge::functools32=3.2.3.2=py27_1
+- conda-forge::future=0.16.0=py27_0
+- conda-forge::gettext=0.19.7=1
+- conda-forge::glib=2.55.0=0
+- conda-forge::gmp=6.1.2=0
+- conda-forge::gmpy2=2.0.8=py27_0
+- conda-forge::gst-plugins-base=1.8.0=0
+- conda-forge::gstreamer=1.8.0=1
+- conda-forge::h5py=2.7.1=py27_2
+- conda-forge::hdf5=1.10.1=1
+- conda-forge::html5lib=1.0.1=py_0
+- conda-forge::icu=58.2=0
+- conda-forge::ipython=5.8.0=py27_0
+- conda-forge::ipython_genutils=0.2.0=py_1
+- conda-forge::isodate=0.6.0=py_0
+- conda-forge::jpeg=9b=2
+- conda-forge::jsoncpp=1.8.4=h2d50403_0
+- conda-forge::keepalive=0.5=py27_0
+- conda-forge::libffi=3.2.1=3
+- conda-forge::libgcc-ng=7.2.0=hdf63c60_3
+- conda-forge::libiconv=1.15=0
+- conda-forge::libpng=1.6.34=0
+- conda-forge::libstdcxx-ng=7.2.0=hdf63c60_3
+- conda-forge::libtiff=4.0.9=he6b73bb_1
+- conda-forge::libxcb=1.12=1
+- conda-forge::libxml2=2.9.5=2
+- conda-forge::libxslt=1.1.32=0
+- conda-forge::lxml=4.1.1=py27_0
+- conda-forge::lzo=2.10=0
+- conda-forge::matplotlib=2.1.1=py27_2
+- conda-forge::mock=2.0.0=py27_0
+- conda-forge::mpc=1.1.0=hb705a9b_6
+- conda-forge::mpfr=4.0.1=0
+- conda-forge::mpmath=1.0.0=py_0
+- conda-forge::ncurses=5.9=10
+- conda-forge::networkx=2.0=py27_1
+- conda-forge::nibabel=2.2.1=py27_0
+- conda-forge::nipy=0.4.1=py27_1
+- conda-forge::nipype=0.14.0=py27_1
+- conda-forge::nitime=0.7=py27h7eb728f_2
+- conda-forge::numexpr=2.6.6=py27_0
+- conda-forge::openblas=0.2.20=6
+- conda-forge::openssl=1.0.2n=0
+- conda-forge::packaging=16.8=py27_0
+- conda-forge::pandas=0.23.4=py27hf8a1672_0
+- conda-forge::pathlib2=2.3.2=py27_0
+- conda-forge::patsy=0.5.0=py_1
+- conda-forge::pbr=3.1.1=py27_0
+- conda-forge::pcre=8.39=0
+- conda-forge::pexpect=4.6.0=py27_0
+- conda-forge::pickleshare=0.7.4=py27_0
+- conda-forge::pip=9.0.1=py27_1
+- conda-forge::pluggy=0.6.0=py_0
+- conda-forge::prompt_toolkit=1.0.15=py_1
+- conda-forge::prov=1.5.0=py27_0
+- conda-forge::psutil=5.4.0=py27_0
+- conda-forge::ptyprocess=0.6.0=py27_0
+- conda-forge::py=1.5.2=py_0
+- conda-forge::pydicom=0.9.9=py27_0
+- conda-forge::pydotplus=2.0.2=py27_0
+- conda-forge::pygments=2.2.0=py_1
+- conda-forge::pyparsing=2.2.0=py27_0
+- conda-forge::pyqt=5.6.0=py27_4
+- conda-forge::pytables=3.4.4=py27_8
+- conda-forge::pytest=3.3.1=py27_0
+- conda-forge::python=2.7.14=4
+- conda-forge::python-dateutil=2.6.1=py27_0
+- conda-forge::pytz=2016.3=py27_0
+- conda-forge::qt=5.6.2=7
+- conda-forge::rdflib=4.2.2=py27_0
+- conda-forge::readline=7.0=0
+- conda-forge::scandir=1.9.0=py27h470a237_0
+- conda-forge::seaborn=0.8.0=py27_0
+- conda-forge::setuptools=38.2.4=py27_0
+- conda-forge::simplegeneric=0.8.1=py_1
+- conda-forge::simplejson=3.11.1=py27_0
+- conda-forge::singledispatch=3.4.0.3=py27_0
+- conda-forge::sip=4.18=py27_1
+- conda-forge::six=1.11.0=py27_1
+- conda-forge::sparqlwrapper=1.7.6=py27_0
+- conda-forge::sqlite=3.20.1=2
+- conda-forge::ssl_match_hostname=3.5.0.1=py27_1
+- conda-forge::statsmodels=0.9.0=py27_0
+- conda-forge::subprocess32=3.2.7=py27_0
+- conda-forge::sympy=1.3=py27_0
+- conda-forge::tbb=2018_20171205=0
+- conda-forge::tk=8.6.7=0
+- conda-forge::tornado=4.5.2=py27_0
+- conda-forge::traitlets=4.3.2=py27_0
+- conda-forge::traits=4.6.0=py27_1
+- conda-forge::vtk=8.1.0=py27h3f2a929_203
+- conda-forge::wcwidth=0.1.7=py_1
+- conda-forge::webencodings=0.5=py27_0
+- conda-forge::wheel=0.30.0=py_1
+- conda-forge::xorg-libxau=1.0.8=3
+- conda-forge::xorg-libxdmcp=1.1.2=3
+- conda-forge::xvfbwrapper=0.2.9=py27_0
+- conda-forge::xz=5.2.3=0
+- conda-forge::zlib=1.2.11=0
+- configobj=4.7.2=py27_0
+- cvxopt=1.1.8=py27_4
+- funcsigs=0.4=py27_0
+- libgfortran=3.0.0=1
+- mkl=2017.0.3=0
+- numpy=1.13.1=py27_0
+- scikit-learn=0.19.0=np113py27_0
+- scipy=0.19.1=np113py27_0
+- pip:
+  - attrs==17.4.0
+  - backports-abc==0.5
+  - backports.functools-lru-cache==1.4
+  - backports.ssl-match-hostname==3.5.0.1
+  - certifi==2017.11.5
+  - click==6.7
+  - configparser==3.5.0
+  - cycler==0.10.0
+  - decorator==4.1.2
+  - dipy==0.14.0
+  - enum34==1.1.6
+  - fastcache==1.0.2
+  - functools32==3.2.3.post2
+  - future==0.16.0
+  - gmpy2==2.0.8
+  - h5py==2.7.1
+  - ipython==5.8.0
+  - keepalive==0.5
+  - lxml==4.1.1
+  - matplotlib==2.1.1
+  - mock==2.0.0
+  - networkx==2.0
+  - nibabel==2.2.1
+  - nipy==0.4.1
+  - nipype==0.14.0
+  - nitime==0.7
+  - numexpr==2.6.6
+  - packaging==16.8
+  - pandas==0.23.4
+  - pathlib2==2.3.2
+  - pbr==3.1.1
+  - pexpect==4.6.0
+  - pickleshare==0.7.4
+  - pip==9.0.1
+  - pluggy==0.6.0
+  - prov==1.5.0
+  - psutil==5.4.0
+  - ptyprocess==0.6.0
+  - py==1.5.2
+  - pydicom==0.9.9
+  - pydotplus==2.0.2
+  - pyparsing==2.2.0
+  - pytest==3.3.1
+  - python-dateutil==2.6.1
+  - pytz==2016.3
+  - rdflib==4.2.2
+  - scandir==1.9.0
+  - seaborn==0.8
+  - setuptools==38.2.4
+  - simplejson==3.11.1
+  - singledispatch==3.4.0.3
+  - six==1.11.0
+  - sparqlwrapper==1.7.6
+  - statsmodels==0.9.0
+  - subprocess32==3.2.7
+  - sympy==1.3
+  - tables==3.4.4
+  - tornado==4.5.2
+  - traitlets==4.3.2
+  - traits==4.6.0
+  - webencodings==0.5
+  - xvfbwrapper==0.2.9
+prefix: /home/raid1/fbeyer/local_pt_life/miniconda2/envs/nip14_lifefu
+
