@@ -1,7 +1,6 @@
 name: nip14_lifefu
 channels: !!python/object/new:ruamel_yaml.comments.CommentedSeq
   listitems:
-  - conda-forge
   - defaults
   state:
     _yaml_format: !!python/object:ruamel_yaml.comments.Format
@@ -11,9 +10,6 @@ channels: !!python/object/new:ruamel_yaml.comments.CommentedSeq
       data:
         0:
         - 1
-        - 4
-        1:
-        - 2
         - 4
       line: 1
 dependencies:
