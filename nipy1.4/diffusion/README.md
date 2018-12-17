@@ -6,10 +6,11 @@
 
 + field distortion correction with FSL: topup
 
-	- In the file of *acqparams_dwi.txt*, Total readout time (FSL) = (number of echoes - 1) * echo spacing = (128/2-1)x0.475ms=29.925ms. The reason of number of echoes needed to be devided by two is because LIFE-DWI was acquired with acceleration, partial Fourier=6/8, GRAPPA=2.
+	- In the file of *acqparams_dwi.txt*, Total readout time (FSL) = (number of echoes - 1) * echo spacing = (64-1)x0.95ms=0.05985ms. The reason of number of echoes needed to be devided by two is because LIFE-DWI was acquired with acceleration GRAPPA=2.
 		- BW in PE= 16.446999999999999 Hz/pix (DICOM-tag: (0019,1028)
 		- Pix in PE= 128, u.a. DICOM-tag: (0051,100b)
-		- dwelltime (echo spacing) = 1/(16.45*128)=0.475ms
+		- dwelltime (echo spacing) = 1/(16.45*128)=0.475ms (effective echo spacing) (would need to be multiplied with reconstructed number of PE steps =128 -1)
+	        - dwell time from protocol (0.95 ms) * actual number of PE steps (64) -1
 
 	- optimised parameters for relatively high resolution of dMRI data
 		- `--warpres=20.4,17,13.6,10.2,8.5,6.8,5.1,3.4,1.7`
