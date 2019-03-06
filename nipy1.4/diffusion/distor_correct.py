@@ -45,7 +45,9 @@ def create_distortion_correct():
         "topup_field",
         "topup_fieldcoef",
         "eddy_corr",
-        "rotated_bvecs"
+        "rotated_bvecs",
+	"total_movement_rms",
+	"outlier_report"
     ]),
         name='outputnode')
 
@@ -131,7 +133,9 @@ def create_distortion_correct():
         (unring, outputnode, [('out_file', 'dwi_unringed')]),
         (unring, eddy, [("out_file", "in_file")]),
         (eddy, outputnode, [("out_corrected", "eddy_corr")]),
-        (eddy, outputnode, [("out_rotated_bvecs", "rotated_bvecs")])
+        (eddy, outputnode, [("out_rotated_bvecs", "rotated_bvecs")]),
+	(eddy, outputnode, [("out_movement_rms", "total_movement_rms")]),
+	(eddy, outputnode, [("out_outlier_report", "outlier_report")])
 
     ])
 
