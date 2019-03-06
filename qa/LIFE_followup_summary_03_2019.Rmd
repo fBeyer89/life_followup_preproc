@@ -1,0 +1,110 @@
+---
+title: "LIFE_followup_summary"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is a summary of LIFE Followup assessment (dating to beginning of March 2019).
+
+#MRI sample characteristics
+
+```{r include=FALSE}
+library(knitr)
+library(readxl)
+life_overview_02_2019<-read_excel("/data/p_life_raw/documents/MST/20190220_Übersicht_Untersuchungen MST.xlsx",sheet=1)
+
+#remove Nas
+life_overview_02_2019=life_overview_02_2019[!is.na(life_overview_02_2019$`Rando-nr.`),]
+
+all_day2=nrow(life_overview_02_2019)
+all_day2_included=nrow(life_overview_02_2019[life_overview_02_2019$MRT=="ja"|life_overview_02_2019$MRT=="Ja",])
+all_excluded=nrow(life_overview_02_2019[life_overview_02_2019$MRT=="nein",])
+
+#16 due to metall
+excl_metall <- nrow(life_overview_02_2019[grep("Metall", life_overview_02_2019$`wenn nein, Grund`),])
+
+#3 due to tinnitus + 2 due to linse
+excl_tinnitus <- nrow(life_overview_02_2019[grep("Tinnitus", life_overview_02_2019$`wenn nein, Grund`),])
+excl_linse <- nrow(life_overview_02_2019[grep("Linse", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#14 due to operation + 9 due to stents + 4 künstl. hüfte + 3 herzschrittmacher + 3 retainer
+excl_OP <- nrow(life_overview_02_2019[grep("OP", life_overview_02_2019$`wenn nein, Grund`),])
+excl_operation <- nrow(life_overview_02_2019[grep("Operation", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_ops <- nrow(life_overview_02_2019[grep("KI: Ops", life_overview_02_2019$`wenn nein, Grund`),])
+excl_stents <- nrow(life_overview_02_2019[grep("Stent", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_hüfte <- nrow(life_overview_02_2019[grep("Hüfte", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_herzs <- nrow(life_overview_02_2019[grep("Herz", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_retainer <- nrow(life_overview_02_2019[grep("Retainer", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#10 due to platzangst
+excl_platzangst <- nrow(life_overview_02_2019[grep("angst", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+
+#3 tattoo or permanent makeup
+excl_tattoo <- nrow(life_overview_02_2019[grep("Tattoo", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_perm <- nrow(life_overview_02_2019[grep("Make", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#7 (??) + 9 unknown
+excl_unknown <- nrow(life_overview_02_2019[grep("freigegeben", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#with other exclusion reasons:
+excl_other <- all_excluded-excl_tattoo-excl_perm-excl_platzangst-excl_retainer-excl_herzs-excl_hüfte-
+              excl_stents- excl_ops - excl_operation - excl_OP - excl_metall - excl_linse - excl_tinnitus - excl_unknown
+              
+
+#MAKE A table out of this
+sample <- matrix(c(all_day2, all_day2_included, all_excluded,
+                  excl_tinnitus, excl_linse, excl_metall, excl_OP+excl_operation+excl_ops, excl_stents, 
+                  excl_hüfte, excl_herzs, excl_retainer, excl_platzangst, excl_tattoo+excl_perm, excl_unknown,excl_other),
+                  #100, 100*(all_day2_included/all_day2), 100*(all_excluded/all_day2), 
+                  #100*(excl_tinnitus, excl_linse, excl_metall, excl_OP+excl_operation+excl_ops,
+                  ncol=1)
+colnames(sample) <- c('# participants')
+rownames(sample) <- c('invited for mri', 'received mri', 'excluded',
+                     'tinnitus', 'lense','metal', 'operation', 'stents', 'artifical hips', 
+                     'pacemaker', 'retainer', 'claustrophobia', 'tattoo', 'unknown', 'other')
+sample.table <- as.table(sample)
+```
+
+```{r echo=FALSE}
+library(knitr)
+
+kable(sample.table)
+
+```
+
+##Quality of the resting-state fMRI
+
+Physiological measures were acquired with a breathing belt and pulse oximetry.
+First, usability of physiological recordings was checked based on file size.
+See script "check_filesize_physio_data.sh" on ???
+
+```{r include=FALSE}
+
+data=read.table("/home/raid1/fbeyer/Documents/Scripts/LIFE_followup_QA/physio_preproc/overview.tsv",fill = T)
+colnames(data)=c("SIC","resp_rs", "pulse_rs", "resp_dti", "pulse_dti")
+
+#all the ones who do not have a folder with physiological files:
+data[data$resp_dti==999,]$SIC
+
+#file size should be 154 for respiration and 240 for pulse (for RS)
+##problems with respiratory file for resting-state (4)
+data[data$resp_dti!=999&data$resp_rs<154,]$SIC #LI0003255X LI00640890 LI00461695 LI00958910
+
+##problems with pulse file for resting-state (13)
+data[data$resp_rs!=999&data$pulse_rs<240,]$SIC
+
+##247 participants on 26.2.19
+length(data$SIC)
+
+##232 participants do have Physlogfiles on 26.2.19
+length(data[data$resp_rs!=999,]$SIC)
+
+##217 participants have (probably) useful Physlogfiles on 26.2.19
+length(data[data$resp_rs!=999&data$pulse_rs==240&data$resp_rs==154,]$SIC)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
