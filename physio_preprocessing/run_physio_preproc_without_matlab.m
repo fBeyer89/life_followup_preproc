@@ -5,6 +5,7 @@ addpath(genpath('/data/pt_life/data_fbeyer/spm-fbeyer'))
 
 %Specify variables
 subjects_file='/data/p_life_raw/scripts/Followup/life_FU_done_2019_02_26_09_39_03.txt'
+%the first 5 participants are from LIFE UPDATE -> ignore!
 
 subjID = fopen(subjects_file);
 subjects=textscan(subjID,'%s');
@@ -73,8 +74,9 @@ physio_in.verbose.process_log = cell(0,1);
 physio_in.verbose.fig_handles = zeros(0,1);  
 
 
-for i=244:size(subjects{1},1)
+for i=6:7%:size(subjects{1},1)
     
+    subjects{1}{i}
     %%some special cases
     %%correct wrong SICS
     if subjects{1}{i}=="LI00474819"
@@ -112,7 +114,7 @@ for i=244:size(subjects{1},1)
     %dicom index is used to find right dicom for timing information
     dicom_number=A(index-4:index-1);
     last_epi_volume=sprintf('%s%s%s', dicom_number,'0300');
-    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/DICOM/%s', subjects{1}{i},subjects{1}{i}, last_epi_volume));
+    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/DICOM/%s', subjects{1}{i},subjects{1}{i}, last_epi_volume))
     files=files(end);
     physio_in.log_files.scan_timing = sprintf("%s/%s",files.folder,files.name); 
   

@@ -4,13 +4,13 @@
 addpath(genpath('/data/pt_life/data_fbeyer/spm-fbeyer'))
 %create physio_in file
 %Specify variables
-subjects_file='/data/p_life_raw/scripts/Followup/life_FU_done_2019_02_26_09_39_03.txt'
+subjects_file='/data/p_life_raw/scripts/Followup/life_FU_done_2019_02_26_09_39_03.txt';
 %'/data/pt_life/data_fbeyer/genetics/analysis/young_and_old/connectome_project/old/794subjects.txt'
 
 subjID = fopen(subjects_file);
 subjects=textscan(subjID,'%s');
 
-all_res=zeros(size(subjects{1},1),9);
+all_res=zeros(size(subjects{1},1),15);
 
 for i=6:size(subjects{1},1)
     
@@ -57,7 +57,7 @@ for i=6:size(subjects{1},1)
             formatSpec = '%f %f %f %f %f %f';
             motion_data = fscanf(fileID,formatSpec);
 
-            length(motion_data)
+            
             if length(motion_data)<1770
                 continue
             else
@@ -91,6 +91,14 @@ for i=6:size(subjects{1},1)
                 all_res(i,9)=corr(FD_power,oxy);
                 all_res(i,10)=corr(FD_power,phys_data.physio.ons_secs.rvt(6:end));
                 all_res(i,11)=corr(FD_power,phys_data.physio.ons_secs.hr(6:end)); 
+		if isfile(sprintf(['/data/pt_life/LIFE_fu/wd_preprocessing/hcp_prep_workflow/resting/'...
+                                  'transform_timeseries/_subject_%s/dvars/rest2anat_dvars.tsv'], subjects{1}{i}))
+                	all_res(i,12)=corr(dvars_std,resp);
+                	all_res(i,13)=corr(dvars_std,oxy);
+                	all_res(i,14)=corr(dvars_std,phys_data.physio.ons_secs.rvt(6:end));
+                	all_res(i,15)=corr(dvars_std,phys_data.physio.ons_secs.hr(6:end)); 
+		end
+
         else 
             continue
         end
@@ -99,11 +107,13 @@ for i=6:size(subjects{1},1)
 end
 
 T = array2table(all_res, 'VariableNames',{'meanFD','maxFD','meanFD_BL','maxFD_BL','meanstdDVARS', 'maxstdDVARS', 'corr_FD_stdDVARS'...
-                                           'corr_FD_resp','corr_FD_oxy','corr_FD_RVT','corr_FD_HR'})
-% 
- T_final=[cell2table(subjects{1}),T];
- writetable(T,'/data/pt_life_restingstate_followup/results/results_rs_motion_physio.csv')
-% writetable(cell2table(subjects{1}),'/data/pt_life_restingstate_followup/results/SIC.csv')
+                                           'corr_FD_resp','corr_FD_oxy','corr_FD_RVT','corr_FD_HR',...
+                                           'corr_dvars_resp','corr_dvars_oxy','corr_dvars_RVT','corr_dvars_HR'})
+ 
+T_final=[cell2table(subjects{1}),T];
+writetable(T,'/data/pt_life_restingstate_followup/results/results_rs_motion_physio.csv')
+
+writetable(cell2table(subjects{1}),'/data/pt_life_restingstate_followup/results/SIC.csv')
 
 
 

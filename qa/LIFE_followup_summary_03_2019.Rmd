@@ -79,32 +79,244 @@ kable(sample.table)
 ##Quality of the resting-state fMRI
 
 Physiological measures were acquired with a breathing belt and pulse oximetry.
-First, usability of physiological recordings was checked based on file size.
-See script "check_filesize_physio_data.sh" on ???
+Preprocessing was done with the Physio Toolbox in Matlab (see [links](https://github.com/fBeyer89/life_followup_preproc/blob/master/physio_preprocessing/run_physio_preproc_without_matlab.m) and [links](https://www.tnu.ethz.ch/en/software/tapas/documentations/physio-toolbox.html)).
+A rough check for completeness of physiological recordings was checked based on file size.
+See script 
+[links](https://github.com/fBeyer89/life_followup_preproc/blob/master/physio_preprocessing/check_filesize_physio_data.sh)
+
+Physiological parameters extracted with the Physio Toolbox were the resampled respiratory and PPU traces (raw recordings downsampled to fMRI resolution), heart and cardiac phase and heart rate (HR) and respiratory volume per time (RVT)
+
+```{r echo=FALSE}
+
+data=read.table("/data/pt_life_restingstate_followup/results/overview_filesize.tsv",fill = T)
+colnames(data)=c("SIC","resp_rs", "pulse_rs", "resp_dti", "pulse_dti")
+data=data[data$SIC!=999,]
+
+##246 participants on 26.2.19
+
+all=nrow(data)
+
+all_usable=length(data[data$resp_rs!=999&data$pulse_rs!=999&(data$pulse_rs>=240&data$resp_rs>=154),]$SIC)
+
+#999 means missing physio files
+missing=length(data[data$resp_rs==999|data$pulse_rs==999,]$SIC)
+
+#file size should be 154 for respiration and 240 for pulse (for RS)
+##problems with respiratory file for resting-state (1)
+error_resp=length(data[data$resp_rs!=999&data$pulse_rs!=999&data$pulse_rs==240&data$resp_rs<154,]$SIC) #LI0003255X LI00640890 LI00461695 LI00958910
+
+##problems with pulse file for resting-state (10)
+error_pulse=length(data[data$resp_rs!=999&data$pulse_rs!=999&data$resp_rs==154&data$pulse_rs<240,]$SIC)
+
+both_erroneous=length(data[data$resp_rs!=999&data$pulse_rs!=999&data$pulse_rs<240&data$resp_rs<154,]$SIC)
+
+physio <- matrix(c(all, all_usable, missing, error_resp, error_pulse,both_erroneous),
+                  ncol=1)
+colnames(physio) <- c('# participants')
+rownames(physio) <- c('scanned on 26.2.19', 'usable physio', 'missing files', 'resp error', 'pulse error', 'both erroneous')
+physio.table <- as.table(physio)
+
+kable(physio.table)
+
+```
+
+
+Head motion was assessed with mean and maximal framewise displacement based on motion parameters from MCFLIRT.
+Previous and current methods to calculate mean FD agree:
+
+```{r echo=FALSE}
+library(haven)
+rsphysio=read.table("/data/pt_life_restingstate_followup/results/results_rs_motion_physio.csv",header=T,fill = T,sep = ',')
+SIC=read.table("/data/pt_life_restingstate_followup/results/SIC.csv",header=T,fill = T,sep = ',')
+rsphysio$SIC=SIC$Var1
+
+##read baseline data and match
+bl=read_sav('/afs/cbs.mpg.de/share/gr_agingandobesity/life_shared/LIFE_comprehensive_list/head_motion/LIFE_subjects_motion_params.sav')
+bl=bl[,c("SIC","meanFD_new","maxFD_new")]
+
+widetable=merge(rsphysio,bl,by.x = "SIC")
+
+##sanity check: mean FD (from python calculation) and mean FD (from new script) at baseline agree.
+plot(widetable[widetable$meanFD_BL!=0,]$meanFD_BL, widetable[widetable$meanFD_BL!=0,]$meanFD_new,
+     xlab="BL mean FD new calculation",
+     ylab ="BL mean FD comprehensive table calculation",
+     main='old and new calculation\n of mean FD agree on BL data')
+```
+
 
 ```{r include=FALSE}
 
-data=read.table("/home/raid1/fbeyer/Documents/Scripts/LIFE_followup_QA/physio_preproc/overview.tsv",fill = T)
-colnames(data)=c("SIC","resp_rs", "pulse_rs", "resp_dti", "pulse_dti")
+##exclude participants without resting state
+##because of unfinished preprocessing or data from LIFE Update -> N=13
+rsphysio=rsphysio[rsphysio$meanFD!=0,]
 
-#all the ones who do not have a folder with physiological files:
-data[data$resp_dti==999,]$SIC
-
-#file size should be 154 for respiration and 240 for pulse (for RS)
-##problems with respiratory file for resting-state (4)
-data[data$resp_dti!=999&data$resp_rs<154,]$SIC #LI0003255X LI00640890 LI00461695 LI00958910
-
-##problems with pulse file for resting-state (13)
-data[data$resp_rs!=999&data$pulse_rs<240,]$SIC
-
-##247 participants on 26.2.19
-length(data$SIC)
-
-##232 participants do have Physlogfiles on 26.2.19
-length(data[data$resp_rs!=999,]$SIC)
-
-##217 participants have (probably) useful Physlogfiles on 26.2.19
-length(data[data$resp_rs!=999&data$pulse_rs==240&data$resp_rs==154,]$SIC)
+#participants without DVARS -> only one doesn't have DVARS "LI0057625X, rerun?"
+rsphysio[rsphysio$meanstdDVARS==0,"SIC"]
+rsphysio=rsphysio[rsphysio$meanstdDVARS!=0,]
+length(rsphysio$SIC)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Investigate the association of motion parameters and physio parameters in the followup (N= `r length(rsphysio$SIC)`)
+
+Histogram of motion parameters and DVARS
+```{r echo=FALSE}
+
+##PLOT some histograms
+par(mfrow=c(2,2))
+hist(rsphysio$meanFD, xlab="", main = "mean FD")
+hist(rsphysio$maxFD, xlab="", main = "max FD")
+hist(rsphysio$meanstdDVARS, xlab="", main = "mean DVARS")
+hist(rsphysio$maxstdDVARS, xlab="", main = "max DVARS")
+```
+
+Strong correlation of mean FD and DVARS 
+```{r echo=FALSE}
+ttest=t.test(rsphysio$corr_FD_stdDVARS)
+par(mfrow=c(1,1))
+hist(rsphysio$corr_FD_stdDVARS, xlab="", main = paste("correlation betw. mean FD & DVARS:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+```
+
+Low/no correlation of motion/DVARS and downsampled resp./PPI traces
+```{r echo=FALSE}
+par(mfrow=c(2,2))
+ttest=t.test(rsphysio$corr_FD_resp)
+hist(rsphysio$corr_FD_resp, main = paste("correlation mean FD and downs. resp:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_dvars_resp)
+hist(rsphysio$corr_dvars_resp, main = paste("correlation DVARS and downs. resp:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_FD_oxy)
+hist(rsphysio$corr_FD_oxy, main = paste("correlation mean FD and downs. oxy:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_dvars_oxy)
+hist(rsphysio$corr_dvars_oxy, main = paste("correlation DVARS and downs. resp:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+```
+
+
+Low/moderate correlation of DVARS and derived physiological parameters RVT and HR
+
+```{r echo=FALSE}
+par(mfrow=c(2,1))
+ttest=t.test(rsphysio$corr_FD_RVT)
+hist(rsphysio$corr_FD_RVT, main = paste("correlation betw. mean FD and RVT:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_FD_HR)
+hist(rsphysio$corr_FD_HR, main=paste("correlation betw. mean FD and HR:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+
+```
+
+Low/moderate correlation of DVARS and derived physiological parameters RVT and HR
+```{r echo=FALSE}
+par(mfrow=c(2,1))
+ttest=t.test(rsphysio$corr_dvars_RVT)
+hist(rsphysio$corr_dvars_RVT, main = paste("correlation betw. mean dvars and RVT:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_dvars_HR)
+hist(rsphysio$corr_dvars_HR, main=paste("correlation betw. mean dvars and HR:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+
+```
+
+So differences in heart rate and respiratory volume explain only small amount of variance in motion and BOLD fluctuations. Yet, head motion and BOLD fluctuations are strongly associated.
+
+
+```{r include=FALSE}
+n_highmotion=nrow(rsphysio[rsphysio$meanFD>0.5|rsphysio$maxFD>3,])
+n_slightlyhigher=nrow(rsphysio[rsphysio$meanFD>0.2|rsphysio$maxFD>3,])
+```
+Still, the impact of physiological parameters might be stronger in high motion subjects. There are `r n_highmotion` participants with mean FD > 0.5 mm or max FD > 3mm in the followup sample. `r n_slightlyhigher` have a mean FD > 0.2 mm.
+
+```{r echo=FALSE}
+ttest=t.test(rsphysio[rsphysio$meanFD>0.2,]$corr_dvars_RVT)
+hist(rsphysio[rsphysio$meanFD>0.2,]$corr_dvars_RVT, main = paste("mean dvars and RVT in participants >0.2mm mean FD:\n average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+```
+
+The association of RVT and DVARS is not more pronounced in participants who move more. (Here it was hypothesized that they would breathe possibly more heavily)
+
+#MOTION compared with baseline assessment
+
+```{r echo=FALSE}
+
+library(reshape2)
+library(ggplot2)
+
+#exclude everybody with meanFD=0 -> not preprocessed at BL
+wide=rsphysio[rsphysio$meanFD_BL!=0&rsphysio$meanFD!=0,]
+
+
+# Specify id.vars: the variables to keep but not split apart on
+long = melt(wide, id.vars=c("SIC","meanstdDVARS", "maxstdDVARS","corr_FD_stdDVARS",
+                                  "corr_FD_resp","corr_FD_oxy","corr_FD_RVT","corr_FD_HR",
+                                  "corr_dvars_resp","corr_dvars_oxy","corr_dvars_RVT","corr_dvars_HR",
+                                  "maxFD","maxFD_BL"))
+
+levels(long$variable)=c("fu","bl")
+long$variable <- relevel(long$variable, "bl")
+colnames(long)[16]="mean_FD"
+
+p <- ggplot(aes(x = variable, y=mean_FD),data=long)+ geom_violin() + geom_point()
+p
+
+tspag = ggplot(long, aes(x=variable, y=mean_FD,group=SIC)) + 
+  geom_line(aes(color=SIC)) + guides(colour=TRUE)
+tspag + theme(axis.text=element_text(size=10),axis.title=element_text(size=12),strip.text = element_text(size=12),legend.position="none")
+
+```
+
+####STATISTICS
+#get some covariates
+cov<-read.table("/afs/cbs.mpg.de/share/gr_agingandobesity/life_shared/LIFE_comprehensive_list/PV168_A1_Pilot_subject_list_inclusion_exclusion29.1.19.csv", 
+                header=T, sep=',')
+cov=cov[,c("SIC","sex","Age_all","bmi")]
+long_with_demo=merge(long,cov, by.x="SIC")
+
+par(mfrow=c(1,1))
+hist(long_with_demo$Age_all, main = "Age distribution")
+
+
+
+
+##CROSSSECTIONAL ANALYSIS
+
+res=lm (mean_FD ~ Age_all + as.factor(sex), data=long_with_demo[long_with_demo$variable=="bl",])
+summary(res)
+
+res=lm (mean_FD ~ Age_all + bmi + as.factor(sex), data=long_with_demo[long_with_demo$variable=="bl",])
+summary(res)
+
+res=lm (mean_FD ~ Age_all + as.factor(sex), data=long_with_demo[long_with_demo$variable=="fu",])
+summary(res)
+
+res=lm (mean_FD ~ Age_all + bmi + as.factor(sex), data=long_with_demo[long_with_demo$variable=="fu",])
+summary(res)
+
+##LONGITUDINAL ANALYSIS for motion
+par(mfrow=c(1,1))
+plot(long_with_demo$Age_all, long_with_demo$mean_FD, 
+     col=as.numeric(long_with_demo$variable),
+     main = "Age(BL) and mean FD @BL")
+legend("topleft",legend = c("black:bl", "red:fu"))
+
+plot(long_with_demo$bmi, long_with_demo$mean_FD, 
+     col=as.numeric(long_with_demo$variable),
+     main = "BMI(BL) and mean FD @BL")
+legend("topleft",legend = c("black:bl", "red:fu"))
+
+##MODEL 1
+
+null<-lmer(mean_FD ~ (1|SIC), data=long_with_demo)
+res1<-lmer(mean_FD ~ as.factor(variable) + (1|SIC), data=long_with_demo)
+
+##there is a significant difference between timepoints
+anova(res1,null)
+
+
+#male and older people also move more
+res2<-lmer(mean_FD ~ as.factor(sex) + Age_all + as.factor(variable) + (1|SIC), data=long_with_demo)
+
+
+res3<-lmer(mean_FD ~ as.factor(sex) + Age_all + bmi + as.factor(variable) + (1|SIC), data=long_with_demo)
+summary(res3)
