@@ -12,7 +12,7 @@ subjects=textscan(subjID,'%s');
 
 all_res=zeros(size(subjects{1},1),15);
 
-for i=6:size(subjects{1},1)
+for i=12:13%size(subjects{1},1)
     
     %if subjects{1}{i}=="LI01273319"%for looking at plots of individual subjects
 
@@ -105,15 +105,15 @@ for i=6:size(subjects{1},1)
     %end
       
 end
-
-T = array2table(all_res, 'VariableNames',{'meanFD','maxFD','meanFD_BL','maxFD_BL','meanstdDVARS', 'maxstdDVARS', 'corr_FD_stdDVARS'...
-                                           'corr_FD_resp','corr_FD_oxy','corr_FD_RVT','corr_FD_HR',...
-                                           'corr_dvars_resp','corr_dvars_oxy','corr_dvars_RVT','corr_dvars_HR'})
- 
-T_final=[cell2table(subjects{1}),T];
-writetable(T,'/data/pt_life_restingstate_followup/results/results_rs_motion_physio.csv')
-
-writetable(cell2table(subjects{1}),'/data/pt_life_restingstate_followup/results/SIC.csv')
+% 
+% T = array2table(all_res, 'VariableNames',{'meanFD','maxFD','meanFD_BL','maxFD_BL','meanstdDVARS', 'maxstdDVARS', 'corr_FD_stdDVARS'...
+%                                            'corr_FD_resp','corr_FD_oxy','corr_FD_RVT','corr_FD_HR',...
+%                                            'corr_dvars_resp','corr_dvars_oxy','corr_dvars_RVT','corr_dvars_HR'})
+%  
+% T_final=[cell2table(subjects{1}),T];
+% writetable(T,'/data/pt_life_restingstate_followup/results/results_rs_motion_physio.csv')
+% 
+% writetable(cell2table(subjects{1}),'/data/pt_life_restingstate_followup/results/SIC.csv')
 
 
 
