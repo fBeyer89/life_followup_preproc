@@ -121,15 +121,17 @@ def create_dti():
     coregistration of FA and T1
     ------------------------------------
     '''
-    #have to rename subject for fu
-    def rename_subject_for_fu(input_id):
-        output_id=input_id+"_fu"
-        return output_id
+    #have to rename subject for fu (but now structural wf is connected to dwi
+    #and its not necessary to rename again.)
+    #def rename_subject_for_fu(input_id):
+    #    output_id=input_id+"_fu"
+    #    return output_id
 
     #modify subject name so it can be saved in the same folder as other LIFE- freesurfer data
-    rename=Node(util.Function(input_names=['input_id'],
-                            output_names=['output_id'],
-                            function = rename_subject_for_fu), name="rename")
+    #rename=Node(util.Function(input_names=['input_id'],
+    #                        output_names=['output_id'],
+    #                        function = rename_subject_for_fu), name="rename")
+    
     # linear registration with bbregister
     bbreg = Node(fs.BBRegister(contrast_type='t1',
     out_fsl_file='fa2anat.mat',
@@ -142,8 +144,7 @@ def create_dti():
     # connecting the nodes
     dwi_preproc.connect([
 
-        (inputnode, rename, [('subject_id', 'input_id')]),
-        (rename, bbreg, [('output_id', 'subject_id')]),
+        (inputnode, bbreg, [('subject_id', 'subject_id')]),
         (inputnode, bbreg, [('freesurfer_dir', 'subjects_dir')]),
         (dti, bbreg, [("FA", "source_file")]),
         (bbreg, outputnode, [('out_fsl_file', 'fa2anat_mat'),

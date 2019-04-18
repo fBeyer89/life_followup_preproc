@@ -132,7 +132,7 @@ class HCPrepWorkflow(pe.Workflow):
             
             #diffusion workflow
 
-            (self.subjects_node, self.dwi_wf, [("subject", "inputnode.subject_id")]),
+            (self.structural_wf, self.dwi_wf, [("outputnode.subject_id", "inputnode.subject_id")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
             (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
