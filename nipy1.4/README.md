@@ -14,7 +14,9 @@ Preprocessing pipelines for the LIFE-Adult Followup assessment (based on HCP pip
 Based on the implementation of HCP pipelines for nipype (https://github.com/beOn/hcpre)
 
 Using software packages and nipype:
-MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FREESURFER --version 5.3.0, nipype version 0.13.0-geb8a930.dev or 1.1.2
+MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FSL --version 5.0.11 FREESURFER --version 5.3.0, nipype version 1.2.0
+
+For DWI QC FSL --version 6.0.1 is needed.
 
 To run it do:
 python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf 
