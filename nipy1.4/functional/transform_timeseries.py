@@ -36,6 +36,7 @@ def create_transform_pipeline(name='transfrom_timeseries'):
     'trans_ts_mean',
     'trans_ts_masked',
     'resamp_brain',
+    'brain_mask_resamp',
     'out_dvars'
     ]),
     name='outputnode')

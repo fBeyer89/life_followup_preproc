@@ -4,7 +4,7 @@ addpath(genpath('/data/pt_life/data_fbeyer/spm-fbeyer'))
 
 
 %Specify variables
-subjects_file='/data/p_life_raw/scripts/Followup/life_FU_done_2019_02_26_09_39_03.txt'
+subjects_file='/data/p_life_raw/scripts/Followup/life_FU_done_2019_05_27_09_13_48.txt'
 %the first 5 participants are from LIFE UPDATE -> ignore!
 
 subjID = fopen(subjects_file);
@@ -74,23 +74,25 @@ physio_in.verbose.process_log = cell(0,1);
 physio_in.verbose.fig_handles = zeros(0,1);  
 
 
-for i=6:7%:size(subjects{1},1)
+for i=307:size(subjects{1},1) %ignore the first five subjects because they
+    %are from LIFE update.
     
-    subjects{1}{i}
+    subjects{1}{i};
     %%some special cases
     %%correct wrong SICS
     if subjects{1}{i}=="LI00474819"
-        subjects{1}{i}="LI00474818"
+        subjects{1}{i}="LI00474818";
     end
     
     if subjects{1}{i}=="LI00102052"
-       subjects{1}{i}="LI00102053"
+       subjects{1}{i}="LI00102053";
     end
     
-    %%exclude participants with faulty data based on file size
+    %%exclude participants with faulty data based on file size/error during
+    %%processing
     if subjects{1}{i}=="LI00647018"||subjects{1}{i}=="LI00143114"||subjects{1}{i}=="LI00552556"||subjects{1}{i}=="LI00605658"||...
        subjects{1}{i}=="LI00630995"||subjects{1}{i}=="LI00958910"||subjects{1}{i}=="LI00640890"||subjects{1}{i}=="LI00706330"||...
-       subjects{1}{i}=="LI00752733"
+       subjects{1}{i}=="LI00752733"||subjects{1}{i}=="LI0127843X"
         continue
     else
     %subject dependent saving options
@@ -114,7 +116,7 @@ for i=6:7%:size(subjects{1},1)
     %dicom index is used to find right dicom for timing information
     dicom_number=A(index-4:index-1);
     last_epi_volume=sprintf('%s%s%s', dicom_number,'0300');
-    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/DICOM/%s', subjects{1}{i},subjects{1}{i}, last_epi_volume))
+    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/DICOM/%s', subjects{1}{i},subjects{1}{i}, last_epi_volume));
     files=files(end);
     physio_in.log_files.scan_timing = sprintf("%s/%s",files.folder,files.name); 
   
@@ -163,6 +165,11 @@ for i=6:7%:size(subjects{1},1)
        %create & run physio file
        physio = tapas_physio_new('empty', physio_in);
        [physio_out, R, ons_secs] = tapas_physio_main_create_regressors(physio);
+ 
+       r=physio_out.trace.resp;
+       save(sprintf('/data/pt_life_restingstate_followup/physio/%s_resp.mat', subjects{1}{i}),'r','-v7')  	
+       c=physio_out.trace.oxy; 
+       save(sprintf('/data/pt_life_restingstate_followup/physio/%s_oxy.mat', subjects{1}{i}),'c','-v7') 
     end
     end
 

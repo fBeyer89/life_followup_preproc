@@ -83,10 +83,10 @@ def create_resting():
     
     
     #outputnode
-    outputnode=Node(util.IdentityInterface(fields=['par','rms','mean_epi','tsnr','fmap','unwarped_mean_epi2fmap',
+    outputnode=Node(util.IdentityInterface(fields=['par','rms','mean_epi','tsnr','stddev_file', 'fmap','unwarped_mean_epi2fmap',
                                                    'coregistered_epi2fmap', 'fmap_fullwarp', 'epi2anat', 'epi2anat_mat',
-                                                   'epi2anat_dat','epi2anat_mincost','full_transform_ts',
-                                                   'full_transform_mean', 'resamp_brain','detrended_epi',
+                                                   'epi2anat_dat','epi2anat_mincost','full_transform_ts','realigned_ts',
+                                                   'full_transform_mean', 'resamp_brain', 'resamp_brain_mask','detrended_epi',
                                                    'dvars_file']),
     name='outputnode')  
         
@@ -121,11 +121,13 @@ def create_resting():
     (fmap_coreg, transform_ts, [('outputnode.fmap_fullwarp', 'inputnode.fullwarp')]),
     (transform_ts, detrend, [('outputnode.trans_ts', 'in_file')]),
     ##all the output
-    (moco, outputnode, [#('outputnode.epi_moco', 'realign.@realigned_ts'),
-    ('outputnode.par_moco', 'par'),
-    ('outputnode.rms_moco', 'rms'),
+    (moco, outputnode, [
+    ('outputnode.epi_moco', 'realigned_ts'),
     ('outputnode.epi_mean', 'mean_epi'),
-    ('outputnode.tsnr_file', 'tsnr')
+    ('outputnode.tsnr_file', 'tsnr'),
+    ('outputnode.stddev_file', 'stddev'),
+    ('outputnode.par_moco', 'par'),
+    ('outputnode.rms_moco', 'rms')
     ]),
     (fmap_coreg, outputnode, [('outputnode.fmap','fmap'),
     ('outputnode.unwarped_mean_epi2fmap', 'unwarped_mean_epi2fmap'),
@@ -139,6 +141,7 @@ def create_resting():
     (transform_ts, outputnode, [('outputnode.trans_ts', 'full_transform_ts'),
     ('outputnode.trans_ts_mean', 'full_transform_mean'),
     ('outputnode.resamp_brain', 'resamp_brain'),
+    ('outputnode.brain_mask_resamp', 'resamp_brain_mask'),
     ('outputnode.out_dvars', 'dvars_file')]),
     (detrend, outputnode, [('out_file','detrended_epi')])
     ])

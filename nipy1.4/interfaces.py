@@ -96,12 +96,12 @@ class DicomInfo(BaseInterface):
         self.info = []
 
     def _run_interface(self, runtime):
-        import dicom
+        import pydicom
         files = self.inputs.files
         by_series = {}
         self.info = []
         for f in files:
-            d = dicom.read_file(f)
+            d = pydicom.dcmread(f)
             try: 
                 s_num = d.SeriesNumber
                 s_num = int(s_num)

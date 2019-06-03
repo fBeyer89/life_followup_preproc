@@ -30,7 +30,8 @@ def create_moco_pipeline(name='motion_correction'):
     'rotplot',
     'transplot',
     'dispplots',
-    'tsnr_file'
+    'tsnr_file',
+    'stddev_file'
     ]),
     name='outputnode')
     # mcflirt motion correction to 1st volume
@@ -79,5 +80,6 @@ def create_moco_pipeline(name='motion_correction'):
     (dispplotter, outputnode, [('out_file', 'dispplots')]),
     (mcflirt, tsnr, [('out_file', 'in_file')]),
     (tsnr, outputnode, [('tsnr_file', 'tsnr_file')]),
+    (tsnr, outputnode, [('stddev_file', 'stddev_file')])
     ])
     return moco
