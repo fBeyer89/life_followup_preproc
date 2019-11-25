@@ -22,7 +22,7 @@
 
 
 
-for subj in LI01997734 LI01663393 LI02151175 LI00172378 LI01284795 LI01615557 LI01851118 LI01873210 LI01850699 LI01862557 LI01878670 LI01925675 LI02114778 LI01352493 LI01688798 LI0216599X LI02405454 LI0051681X LI01114399 LI01287335 LI01305754 LI01445354 LI01633237 LI02257233 
+for subj in LI0026893X
 do
 
 eddy_quad /data/pt_life_dti_followup/diffusion/${subj}/eddy_corrected --eddyIdx /home/raid1/fbeyer/Documents/Scripts/LIFE_followup/preprocessing/nipy1.4/diffusion/index.txt --eddyParams /home/raid1/fbeyer/Documents/Scripts/LIFE_followup/preprocessing/nipy1.4/diffusion/acqparams_dwi.txt --mask /data/pt_life_dti_followup/diffusion/${subj}/dwi_appa_corrected_maths_brain_mask.nii.gz --bvals /data/pt_life_dti_followup/diffusion/${subj}/cmrrmbep2ddiffs*.bval -g /data/pt_life_dti_followup/diffusion/${subj}/cmrrmbep2ddiffs*.bvec -f /data/pt_life_dti_followup/diffusion/${subj}/dwi_appa_field.nii.gz
@@ -37,4 +37,8 @@ done
 
 #doesnt work
 #eddy_quad /data/pt_life_dti_followup/diffusion/LI0026893X/eddy_corrected --eddyIdx=/home/raid1/fbeyer/Documents/Scripts/LIFE_followup/preprocessing/nipy1.4/diffusion/index.txt --eddyParams=/home/raid1/fbeyer/Documents/Scripts/LIFE_followup/preprocessing/nipy1.4/diffusion/acqparams_dwi.txt --mask=/data/pt_life_dti_followup/diffusion/LI0026893X/dwi_appa_corrected_maths_brain_mask.nii.gz --bvals=/data/pt_life_dti_followup/diffusion/LI0026893X/cmrrmbep2ddiffs009a001.bval
+
+rm -rf /data/pt_life_dti_followup/squad
+eddy_squad -o /data/pt_life_dti_followup/squad /data/pt_life_dti_followup/squad_tst.txt
+
 
