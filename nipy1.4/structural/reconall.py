@@ -24,9 +24,9 @@ def create_reconall_pipeline(name='reconall'):
     name='outputnode')
     
     def rename_subject_for_fu(input_id):
-        output_id=input_id+"_fu"
-        return output_id
-       
+	   output_id=input_id+"_fu"
+	   return output_id
+ 
     #modify subject name so it can be saved in the same folder as other LIFE- freesurfer data
     rename=Node(util.Function(input_names=['input_id'], 
                             output_names=['output_id'],

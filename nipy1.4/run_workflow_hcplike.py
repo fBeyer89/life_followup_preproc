@@ -9,6 +9,7 @@ Copyright (c) 2013 Ben Acland
 import os
 import sys
 import getopt
+import pandas as pd
 
 from workflow import *
 help_message = """

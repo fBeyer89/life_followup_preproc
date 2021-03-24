@@ -16,7 +16,7 @@
 - Owner of the repository aprove the pull request
 
 **Important Note: use branches to push your changes, do not push to the master branch**
-Branch is quite complicated, what I knew so far: 
+Branch is quite complicated, what I knew so far:
 - the changes within the branch would not affect the master branch, but you may need to remove the files when you use `git rm --cached 'file name'` within the branch, otherwise you cannot switch back to master.
 - when you use `git push origin 'branch-name'`, your changes are only visible under the branch not on the master level.
 
@@ -33,12 +33,12 @@ Branch is quite complicated, what I knew so far:
 - to see the current status of the files that needed to be commit, push or add...
 `git status`
 - to view branches
-`git branch` 
+`git branch`
 the current branch will be highline with an asterisk
 - to switch branches
 `git checkout 'branch-name'`
 - switch to the master branch
-`git checkout master` 
+`git checkout master`
 - pull the changes from the master
 `git pull origin master`
 - merge the changes from your branch
@@ -46,3 +46,7 @@ the current branch will be highline with an asterisk
 - push the chagnes to github
 `git push origin master`
 
+## how to delete files from git when they were added to .gitignore later
+git rm --cached `git ls-files -i --exclude-from=.gitignore`
+git commit -m 'Removed all files that are in the .gitignore'
+git push origin master

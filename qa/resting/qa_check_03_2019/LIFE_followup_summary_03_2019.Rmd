@@ -1,0 +1,360 @@
+---
+title: "LIFE_followup_summary"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is a summary of LIFE Followup assessment (dating to beginning of March 2019).
+
+#MRI sample characteristics (based on acquired data on 20.02.2019)
+
+```{r include=FALSE}
+library(knitr)
+library(readxl)
+life_overview_02_2019<-read_excel("/data/p_life_raw/documents/MST/20190220_Übersicht_Untersuchungen MST.xlsx",sheet=1)
+
+#remove Nas
+life_overview_02_2019=life_overview_02_2019[!is.na(life_overview_02_2019$`Rando-nr.`),]
+
+all_day2=nrow(life_overview_02_2019)
+all_day2_included=nrow(life_overview_02_2019[life_overview_02_2019$MRT=="ja"|life_overview_02_2019$MRT=="Ja",])
+all_excluded=nrow(life_overview_02_2019[life_overview_02_2019$MRT=="nein",])
+
+#16 due to metall
+excl_metall <- nrow(life_overview_02_2019[grep("Metall", life_overview_02_2019$`wenn nein, Grund`),])
+
+#3 due to tinnitus + 2 due to linse
+excl_tinnitus <- nrow(life_overview_02_2019[grep("Tinnitus", life_overview_02_2019$`wenn nein, Grund`),])
+excl_linse <- nrow(life_overview_02_2019[grep("Linse", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#14 due to operation + 9 due to stents + 4 künstl. hüfte + 3 herzschrittmacher + 3 retainer
+excl_OP <- nrow(life_overview_02_2019[grep("OP", life_overview_02_2019$`wenn nein, Grund`),])
+excl_operation <- nrow(life_overview_02_2019[grep("Operation", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_ops <- nrow(life_overview_02_2019[grep("KI: Ops", life_overview_02_2019$`wenn nein, Grund`),])
+excl_stents <- nrow(life_overview_02_2019[grep("Stent", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_hüfte <- nrow(life_overview_02_2019[grep("Hüfte", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_herzs <- nrow(life_overview_02_2019[grep("Herz", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_retainer <- nrow(life_overview_02_2019[grep("Retainer", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#10 due to platzangst
+excl_platzangst <- nrow(life_overview_02_2019[grep("angst", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+
+#3 tattoo or permanent makeup
+excl_tattoo <- nrow(life_overview_02_2019[grep("Tattoo", life_overview_02_2019$`wenn nein, Grund`),]) 
+excl_perm <- nrow(life_overview_02_2019[grep("Make", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#7 (??) + 9 unknown
+excl_unknown <- nrow(life_overview_02_2019[grep("freigegeben", life_overview_02_2019$`wenn nein, Grund`),]) 
+
+#with other exclusion reasons:
+excl_other <- all_excluded-excl_tattoo-excl_perm-excl_platzangst-excl_retainer-excl_herzs-excl_hüfte-
+              excl_stents- excl_ops - excl_operation - excl_OP - excl_metall - excl_linse - excl_tinnitus - excl_unknown
+              
+
+#MAKE A table out of this
+sample <- matrix(c(all_day2, all_day2_included, all_excluded,
+                  excl_tinnitus, excl_linse, excl_metall, excl_OP+excl_operation+excl_ops, excl_stents, 
+                  excl_hüfte, excl_herzs, excl_retainer, excl_platzangst, excl_tattoo+excl_perm, excl_unknown,excl_other),
+                  #100, 100*(all_day2_included/all_day2), 100*(all_excluded/all_day2), 
+                  #100*(excl_tinnitus, excl_linse, excl_metall, excl_OP+excl_operation+excl_ops,
+                  ncol=1)
+colnames(sample) <- c('# participants')
+rownames(sample) <- c('invited for mri', 'received mri', 'excluded',
+                     'tinnitus', 'lense','metal', 'operation', 'stents', 'artifical hips', 
+                     'pacemaker', 'retainer', 'claustrophobia', 'tattoo', 'unknown', 'other')
+sample.table <- as.table(sample)
+```
+
+```{r echo=FALSE}
+library(knitr)
+
+kable(sample.table)
+
+```
+
+##Demographic information on the followup sample (N=241, scanned at baseline and followup until 26.2.19)
+```{r echo=FALSE}
+
+#all scanned participants (##246 participants on 26.2.19, 241 with demographics)
+data=read.table("/data/pt_life_restingstate_followup/results/overview_filesize.tsv",fill = T)
+colnames(data)=c("SIC","resp_rs", "pulse_rs", "resp_dti", "pulse_dti")
+data=data[data$SIC!=999,]
+all=nrow(data)
+
+#demographics from baseline
+cov<-read.table("/afs/cbs.mpg.de/share/gr_agingandobesity/life_shared/LIFE_comprehensive_list/PV168_A1_Pilot_subject_list_inclusion_exclusion29.1.19.csv", 
+                header=T, sep=',')
+cov=cov[,c("SIC","sex","Age_all","bmi")]
+
+demo=merge(data,cov,by.x = "SIC", all.x=TRUE)
+
+
+##PLOT some histograms
+par(mfrow=c(3,1))
+hist(demo$Age_all, xlab="Age at baseline", main = paste("N=", nrow(demo[!is.na(demo$sex),]), ", mean Age:", round(mean(demo$Age_all,na.rm=TRUE),2)))
+plot(demo$sex, xlab="Sex distribution", main = paste("male:",nrow(demo[!is.na(demo$sex)&demo$sex=="male",]),",female:",
+                                                                  nrow(demo[!is.na(demo$sex)&demo$sex=="female",])))
+hist(demo$bmi, xlab="BMI at baseline", main = paste("mean BMI:", round(mean(demo$bmi,na.rm=TRUE),2)))
+```
+
+5 participants don't have baseline demographic data (because of wrong SIC or because they had no baseline assessment: `r demo[is.na(demo$Age_all),"SIC"]`)
+
+##Quality of the resting-state fMRI
+
+Physiological measures were acquired with a breathing belt and pulse oximetry.
+Preprocessing was done with the Physio Toolbox in Matlab (see [physio preprocessing](https://github.com/fBeyer89/life_followup_preproc/blob/master/physio_preprocessing/run_physio_preproc_without_matlab.m) and [PhysiO-toolbox](https://www.tnu.ethz.ch/en/software/tapas/documentations/physio-toolbox.html)).
+A rough check for completeness of physiological recordings was checked based on file size.
+See script 
+[check_filesize](https://github.com/fBeyer89/life_followup_preproc/blob/master/physio_preprocessing/check_filesize_physio_data.sh)
+
+Physiological parameters extracted with the Physio Toolbox were the resampled respiratory and PPU traces (raw recordings downsampled to fMRI resolution), heart and cardiac phase and heart rate (HR) and respiratory volume per time (RVT)
+
+```{r echo=FALSE}
+all_usable=length(data[data$resp_rs!=999&data$pulse_rs!=999&(data$pulse_rs>=240&data$resp_rs>=154),]$SIC)
+
+#999 means missing physio files
+missing=length(data[data$resp_rs==999|data$pulse_rs==999,]$SIC)
+
+#file size should be 154 for respiration and 240 for pulse (for RS)
+##problems with respiratory file for resting-state (1)
+error_resp=length(data[data$resp_rs!=999&data$pulse_rs!=999&data$pulse_rs==240&data$resp_rs<154,]$SIC) #LI0003255X LI00640890 LI00461695 LI00958910
+
+##problems with pulse file for resting-state (10)
+error_pulse=length(data[data$resp_rs!=999&data$pulse_rs!=999&data$resp_rs==154&data$pulse_rs<240,]$SIC)
+
+both_erroneous=length(data[data$resp_rs!=999&data$pulse_rs!=999&data$pulse_rs<240&data$resp_rs<154,]$SIC)
+
+physio <- matrix(c(all, all_usable, missing, error_resp, error_pulse,both_erroneous),
+                  ncol=1)
+colnames(physio) <- c('# participants')
+rownames(physio) <- c('scanned on 26.2.19', 'usable physio', 'missing files', 'resp error', 'pulse error', 'both erroneous')
+physio.table <- as.table(physio)
+
+kable(physio.table)
+
+```
+
+
+Head motion was assessed with mean and maximal framewise displacement based on motion parameters from MCFLIRT (Power, 2012).
+Previous and current methods to calculate mean FD agree:
+
+```{r echo=FALSE}
+library(haven)
+rsphysio=read.table("/data/pt_life_restingstate_followup/results/results_rs_motion_physio.csv",header=T,fill = T,sep = ',')
+SIC=read.table("/data/pt_life_restingstate_followup/results/SIC.csv",header=T,fill = T,sep = ',')
+rsphysio$SIC=SIC$Var1
+
+##read baseline data and match
+bl=read_sav('/afs/cbs.mpg.de/share/gr_agingandobesity/life_shared/LIFE_comprehensive_list/head_motion/LIFE_subjects_motion_params.sav')
+bl=bl[,c("SIC","meanFD_new","maxFD_new")]
+
+widetable=merge(rsphysio,bl,by.x = "SIC")
+
+##sanity check: mean FD (from python calculation) and mean FD (from new script) at baseline agree.
+plot(widetable[widetable$meanFD_BL!=0,]$meanFD_BL, widetable[widetable$meanFD_BL!=0,]$meanFD_new,
+     xlab="BL mean FD new calculation",
+     ylab ="BL mean FD comprehensive table calculation",
+     main='old and new calculation\n of mean FD agree on BL data')
+```
+
+
+```{r include=FALSE}
+
+##exclude participants without resting state
+##because of unfinished preprocessing or data from LIFE Update -> N=13
+rsphysio=rsphysio[rsphysio$meanFD!=0,]
+
+#participants without DVARS -> only one doesn't have DVARS "LI0057625X, rerun?"
+rsphysio[rsphysio$meanstdDVARS==0,"SIC"]
+rsphysio=rsphysio[rsphysio$meanstdDVARS!=0,]
+length(rsphysio$SIC)
+```
+
+In addition, DVARS  (D referring to temporal derivative of timecourses, VARS referring to RMS variance over voxels) was calculated [nipype/ComputeDvars](https://nipype.readthedocs.io/en/latest/interfaces/generated/nipype.algorithms.confounds.html#computedvars). DVARS is  a measure of how much the intensity of a brain image changes in comparison to the previous timepoint (as opposed to the global signal, which is the average value of a brain image at a timepoint).
+
+##Association of motion parameters and physio parameters in the followup (N= `r length(rsphysio$SIC)`)
+
+Distribution of motion parameters and DVARS
+```{r echo=FALSE}
+
+##PLOT some histograms
+par(mfrow=c(2,2))
+hist(rsphysio$meanFD, xlab="", main = "mean FD")
+hist(rsphysio$maxFD, xlab="", main = "max FD")
+hist(rsphysio$meanstdDVARS, xlab="", main = "mean DVARS")
+hist(rsphysio$maxstdDVARS, xlab="", main = "max DVARS")
+```
+
+Strong correlation of mean FD and DVARS 
+```{r echo=FALSE}
+ttest=t.test(rsphysio$corr_FD_stdDVARS)
+par(mfrow=c(1,1))
+hist(rsphysio$corr_FD_stdDVARS, xlab="", main = paste("correlation betw. mean FD & DVARS:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+```
+
+Low/no correlation of motion/DVARS and downsampled resp./PPI traces
+```{r echo=FALSE}
+par(mfrow=c(2,2))
+ttest=t.test(rsphysio$corr_FD_resp)
+hist(rsphysio$corr_FD_resp, main = paste("correlation mean FD and downs. resp:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_dvars_resp)
+hist(rsphysio$corr_dvars_resp, main = paste("correlation DVARS and downs. resp:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_FD_oxy)
+hist(rsphysio$corr_FD_oxy, main = paste("correlation mean FD and downs. oxy:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_dvars_oxy)
+hist(rsphysio$corr_dvars_oxy, main = paste("correlation DVARS and downs. resp:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+```
+
+
+Low/moderate correlation of mean FD and derived physiological parameters RVT and HR
+
+```{r echo=FALSE}
+par(mfrow=c(2,1))
+ttest=t.test(rsphysio$corr_FD_RVT)
+hist(rsphysio$corr_FD_RVT, main = paste("correlation betw. mean FD and RVT:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_FD_HR)
+hist(rsphysio$corr_FD_HR, main=paste("correlation betw. mean FD and HR:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+
+```
+
+Low/moderate correlation of DVARS and derived physiological parameters RVT and HR
+```{r echo=FALSE}
+par(mfrow=c(2,1))
+ttest=t.test(rsphysio$corr_dvars_RVT)
+hist(rsphysio$corr_dvars_RVT, main = paste("correlation betw. mean dvars and RVT:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+ttest=t.test(rsphysio$corr_dvars_HR)
+hist(rsphysio$corr_dvars_HR, main=paste("correlation betw. mean dvars and HR:\n
+     average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)))
+
+```
+
+So differences in heart rate and respiratory volume explain only small amount of variance in motion and BOLD fluctuations. Yet, head motion and BOLD fluctuations are strongly associated.
+
+
+```{r include=FALSE}
+n_highmotion=nrow(rsphysio[rsphysio$meanFD>0.5|rsphysio$maxFD>3,])
+n_slightlyhigher=nrow(rsphysio[rsphysio$meanFD>0.2|rsphysio$maxFD>3,])
+```
+Still, the impact of physiological parameters might be stronger in high motion subjects. There are `r n_highmotion` participants with mean FD > 0.5 mm or max FD > 3mm in the followup sample. `r n_slightlyhigher` have a mean FD > 0.2 mm.
+
+```{r echo=FALSE}
+ttest=t.test(rsphysio[rsphysio$meanFD>0.2,]$corr_dvars_RVT)
+hist(rsphysio[rsphysio$meanFD>0.2,]$corr_dvars_RVT, main = paste("mean dvars and RVT in participants >0.2mm mean FD:\n average r =",round(ttest$estimate,2), "p =", round(ttest$p.value,3)), xlab="correlation of DVARS and RVT")
+```
+
+The association of RVT and DVARS is not more pronounced in participants who move more. (Here it was hypothesized that they would breathe possibly more heavily)
+
+##Head motion compared with baseline assessment
+
+###Cross-sectional analysis
+```{r echo=FALSE}
+library(reshape2)
+library(ggplot2)
+
+#exclude everybody with meanFD=0 -> not preprocessed at BL
+wide=rsphysio[rsphysio$meanFD_BL!=0&rsphysio$meanFD!=0,]
+
+# Specify id.vars: the variables to keep but not split apart on
+long = melt(wide, id.vars=c("SIC","meanstdDVARS", "maxstdDVARS","corr_FD_stdDVARS",
+                                  "corr_FD_resp","corr_FD_oxy","corr_FD_RVT","corr_FD_HR",
+                                  "corr_dvars_resp","corr_dvars_oxy","corr_dvars_RVT","corr_dvars_HR",
+                                  "maxFD","maxFD_BL"))
+
+levels(long$variable)=c("fu","bl")
+long$variable <- relevel(long$variable, "bl")
+colnames(long)[16]="mean_FD"
+colnames(long)[15]="timepoint"
+
+long_with_demo=merge(long,cov, by.x="SIC")
+long_with_demo$Age_all_z=scale(long_with_demo$Age_all)
+long_with_demo$sex_z=scale(as.numeric(long_with_demo$sex))
+
+null_bl=lm (mean_FD ~ Age_all_z + sex_z, data=long_with_demo[long_with_demo$timepoint=="bl",])
+res_bl=lm (mean_FD ~ Age_all_z + bmi + sex_z, data=long_with_demo[long_with_demo$timepoint=="bl",])
+res_anova_bl=anova(res_bl,null_bl)
+p_val_bl=res_anova_bl$`Pr(>F)`[2]
+coefs_bl=coefficients(res_bl)
+
+null_fu=lm (mean_FD ~ Age_all_z + sex_z, data=long_with_demo[long_with_demo$timepoint=="fu",])
+res_fu=lm (mean_FD ~ Age_all_z + bmi + sex_z, data=long_with_demo[long_with_demo$timepoint=="fu",])
+res_anova_fu=anova(res_fu,null_fu)
+p_val_fu=res_anova_fu$`Pr(>F)`[2]
+coefs_fu=coefficients(res_fu)
+
+par(mfrow=c(1,1))
+plot(long_with_demo$bmi, long_with_demo$mean_FD, 
+     col=as.numeric(long_with_demo$timepoint),
+     main = "Association of BMI and mean FD",
+     xlab="BMI at baseline",
+     ylab="mean FD")
+legend("topleft",legend = c("black>bl", "red>fu"))
+x.vals=seq(from=min(long_with_demo$bmi), to=max(long_with_demo$bmi),
+           length.out=100)
+y.vals.a=coefs_bl["(Intercept)"]+coefs_bl["bmi"]*x.vals
+lines(x=x.vals, y=y.vals.a, lty=2, col="black")
+y.vals.b=coefs_fu["(Intercept)"]+coefs_fu["bmi"]*x.vals
+lines(x=x.vals, y=y.vals.b, lty=2, col="red")
+
+```
+
+At baseline and followup, head motion and BMI were strongly associated, even when correcting for age and sex (anova comparison of null model (age,sex) with BMI model (age,sex,BMI) of mean FD: baseline: F=`r round(res_anova_bl$F[2],2)`, p=`r p_val_bl`, followup: F=`r round(res_anova_fu$F[2],2)`, p=`r p_val_fu`). The BMI coefficients are very comparable, but there is less motion in the followup.
+
+####Summary of the regression model with the baseline mean FD:
+```{r echo=FALSE}
+kable(res_bl$coefficients)
+```
+
+####Summary of the regression model with the followup mean FD:
+```{r echo=FALSE}
+kable(res_fu$coefficients)
+```
+
+
+###Longitudinal analysis
+```{r echo=FALSE}
+
+
+p <- ggplot(aes(x = timepoint, y=mean_FD),data=long)+ geom_violin() + geom_point()
+p
+
+tspag = ggplot(long, aes(x=timepoint, y=mean_FD,group=SIC)) + 
+  geom_line(aes(color=SIC)) + guides(colour=TRUE)
+tspag + theme(axis.text=element_text(size=10),axis.title=element_text(size=12),strip.text = element_text(size=12),legend.position="none")
+
+```
+
+```{r include=FALSE}
+##LONGITUDINAL ANALYSIS for motion
+library(lme4)
+##MODEL 1
+null<-lmer(mean_FD ~ (1|SIC), data=long_with_demo)
+res1<-lmer(mean_FD ~ as.factor(timepoint) + (1|SIC), data=long_with_demo)
+
+##there is a significant difference between timepoints
+res_tp=anova(res1,null)
+p_tp=res_tp$`Pr(>Chisq)`[2]
+```
+
+Participants move less at the followup compared to the baseline assessment (possibly due to training, less nervousness or better head positioning). When comparing baseline and followup, Chisq-test was significant (Chisq=`r round(res_tp$Chisq[2],2)`, p=`r p_tp`).
+
+##Is the association of BMI and head motion due to stronger breathing?
+Then the association of DVARS and RVT/HR should be stronger in people with higher BMI (as for these people higher stronger breathing should explain more variance in DVARS)
+```{r echo=FALSE}
+#only in the followup-data
+RVT_fu=lm (corr_dvars_RVT ~ Age_all_z + bmi + sex_z, data=long_with_demo[long_with_demo$timepoint=="fu",])
+HR_fu=lm (corr_dvars_HR ~ Age_all_z + bmi + sex_z, data=long_with_demo[long_with_demo$timepoint=="fu",])
+```
+
+BMI does not predict higher correlation of DVARS and RVT/HR. Age is weakly associated with corr_dvars_RV (p=`r round(summary(RVT_fu)$coefficients[2,4],2)`). Generally, the variance explained by demographic factors in measures reflecting the correlation of physiological markers and head motion/DVARS is very low (<1%).

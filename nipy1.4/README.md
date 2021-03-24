@@ -7,20 +7,23 @@ Preprocessing pipelines for the LIFE-Adult Followup assessment (based on HCP pip
 + Functional (rsfMRI) preprocessing: removal of first 4 volumes, motion correction (MCFlirt), coregistration to anatomical (BBREGISTER)
 , unwarping (FUGUE) applied in a single step, removal of linear trend.
 
-+ Diffusion MRI preprocessing: artefacts correction includeing denoising (MRTrix: dwidenoise) and Gibb's ringing removal (MRTrix: mrdegibbs); field distortion correction (FSL: topup); motion correction and outliner replacement (FSL: eddy); tensor model fitting (FSL: dtifit)
++ Diffusion MRI preprocessing: artefacts correction including denoising (MRTrix: dwidenoise) and Gibb's ringing removal (MRTrix: mrdegibbs); field distortion correction (FSL: topup); motion correction and outliner replacement (FSL: eddy); tensor model fitting (FSL: dtifit)
 
 + Creating a report for quick overview of the data.
 
 Based on the implementation of HCP pipelines for nipype (https://github.com/beOn/hcpre)
 
-Using software packages and nipype:
-getserver -sL -g5
-MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FSL --version 5.0.11 FREESURFER --version 5.3.0, nipype version 1.2.0
-source activate agewell_nip1.2
+ **Connect to generation 5 server**  
+`getserver -sL -g5`
+
+**Load software packages and nipype version 1.2.0**  
+`MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FSL --version 5.0.11 FREESURFER --version 5.3.0`
+
+`source activate agewell_nip1.2`
 
 For DWI QC FSL --version 6.0.1 is needed.
 
-To run it do:
-python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf 
+To run the workflow:
+`python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf `
 
 working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)

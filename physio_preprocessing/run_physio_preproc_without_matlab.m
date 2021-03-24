@@ -4,8 +4,7 @@ addpath(genpath('/data/pt_life/data_fbeyer/spm-fbeyer'))
 
 
 %Specify variables
-subjects_file='/data/p_life_raw/scripts/Followup/life_FU_done_2019_05_27_09_13_48.txt'
-%the first 5 participants are from LIFE UPDATE -> ignore!
+subjects_file='/data/pt_life_restingstate_followup/Results/Summaries/qa_check2021/usable_physio_data.txt'
 
 subjID = fopen(subjects_file);
 subjects=textscan(subjID,'%s');
@@ -34,7 +33,7 @@ physio_in.preproc.cardiac.initial_cpulse_select.method = 'auto'; %automated dete
 physio_in.preproc.cardiac.initial_cpulse_select.file = '';
 physio_in.preproc.cardiac.initial_cpulse_select.min = 1;
 physio_in.preproc.cardiac.initial_cpulse_select.kRpeak = [];
-physio_in.preproc.cardiac.posthoc_cpulse_select.method = 'off'; %manual correction can be an option.
+physio_in.preproc.cardiac.posthoc_cpulse_select.method = 'on'; %manual correction can be an option.
 physio_in.preproc.cardiac.posthoc_cpulse_select.file='';
 physio_in.preproc.cardiac.posthoc_cpulse_select.percentile = 80; %percentile of 
                                                                  %beat-2-beat interval histogram 
@@ -66,7 +65,7 @@ physio_in.model.noise_rois.include=0;
 physio_in.model.movement.include=0;
 
 physio_in.ons_secs = [];
-physio_in.verbose.level = 0;
+physio_in.verbose.level = 4;
 physio_in.verbose.process_log = cell(0,1); 
                                 % stores text outputs of PhysIO Toolbox
                                 % processing, e.g. warnings about missed
@@ -74,36 +73,25 @@ physio_in.verbose.process_log = cell(0,1);
 physio_in.verbose.fig_handles = zeros(0,1);  
 
 
-for i=307:size(subjects{1},1) %ignore the first five subjects because they
-    %are from LIFE update.
+for i=468:469%size(subjects{1},1) 
     
     subjects{1}{i};
-    %%some special cases
-    %%correct wrong SICS
-    if subjects{1}{i}=="LI00474819"
-        subjects{1}{i}="LI00474818";
-    end
-    
-    if subjects{1}{i}=="LI00102052"
-       subjects{1}{i}="LI00102053";
-    end
+
     
     %%exclude participants with faulty data based on file size/error during
-    %%processing
-    if subjects{1}{i}=="LI00647018"||subjects{1}{i}=="LI00143114"||subjects{1}{i}=="LI00552556"||subjects{1}{i}=="LI00605658"||...
-       subjects{1}{i}=="LI00630995"||subjects{1}{i}=="LI00958910"||subjects{1}{i}=="LI00640890"||subjects{1}{i}=="LI00706330"||...
-       subjects{1}{i}=="LI00752733"||subjects{1}{i}=="LI0127843X"
-        continue
+    %%processing (not used as input is only "clean data")
+    if subjects{1}{i}=="LI02271832"%||subjects{1}{i}=="LI02692576"
+       continue
     else
     %subject dependent saving options
-    mkdir(sprintf('/data/pt_life_restingstate_followup/physio/%s', subjects{1}{i}));
-    physio_in.save_dir = sprintf('/data/pt_life_restingstate_followup/physio/%s', subjects{1}{i});
-    sprintf('/data/pt_life_restingstate_followup/physio/%s/results.jpg', subjects{1}{i})
-    physio_in.verbose.fig_output_file = sprintf('/data/pt_life_restingstate_followup/physio/%s/results.jpg', subjects{1}{i}); 
+    mkdir(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s', subjects{1}{i}));
+    physio_in.save_dir = sprintf('/data/pt_life_restingstate_followup/Data/physio/%s', subjects{1}{i});
+    sprintf('/data/pt_life_restingstate_followup/Data/physio/%s/results.jpg', subjects{1}{i})
+    physio_in.verbose.fig_output_file = sprintf('/data/pt_life_restingstate_followup/Data/physio/%s/results.jpg', subjects{1}{i}); 
     %physio_in.verbose.fig_output_file = sprintf('/data/pt_life/data_fbeyer/testing_LIFE_fu/preprocessed/physio/%s/results.jpg', subjects{i}); 
 
     %Define variables for individual subjects MRI data
-    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/Scans.txt', subjects{1}{i},subjects{1}{i}));
+    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_20*/Scans.txt', subjects{1}{i},subjects{1}{i}));
     %always select last folder (most current)
     files=files(end);
     
@@ -116,12 +104,12 @@ for i=307:size(subjects{1},1) %ignore the first five subjects because they
     %dicom index is used to find right dicom for timing information
     dicom_number=A(index-4:index-1);
     last_epi_volume=sprintf('%s%s%s', dicom_number,'0300');
-    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/DICOM/%s', subjects{1}{i},subjects{1}{i}, last_epi_volume));
+    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_20*/DICOM/%s', subjects{1}{i},subjects{1}{i}, last_epi_volume));
     files=files(end);
     physio_in.log_files.scan_timing = sprintf("%s/%s",files.folder,files.name); 
   
     %find resp and cardiac files
-    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/PHYS_%s/%s/Physio_log_*.resp', subjects{1}{i},subjects{1}{i},subjects{1}{i},subjects{1}{i}));
+    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_20*/PHYS_%s/%s/Physio_log_*.resp', subjects{1}{i},subjects{1}{i},subjects{1}{i},subjects{1}{i}));
     
     if isempty(files)
         res(i,1)=0;
@@ -140,7 +128,7 @@ for i=307:size(subjects{1},1) %ignore the first five subjects because they
         end
     end
        
-    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_201*/PHYS_%s/%s/Physio_log_*.puls', subjects{1}{i},subjects{1}{i},subjects{1}{i},subjects{1}{i}));
+    files=dir(sprintf('/data/p_life_raw/patients/%s/%s_20*/PHYS_%s/%s/Physio_log_*.puls', subjects{1}{i},subjects{1}{i},subjects{1}{i},subjects{1}{i}));
     if isempty(files)
         res(i,2)=0;
     else   
@@ -167,9 +155,9 @@ for i=307:size(subjects{1},1) %ignore the first five subjects because they
        [physio_out, R, ons_secs] = tapas_physio_main_create_regressors(physio);
  
        r=physio_out.trace.resp;
-       save(sprintf('/data/pt_life_restingstate_followup/physio/%s_resp.mat', subjects{1}{i}),'r','-v7')  	
+       save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_resp.mat', subjects{1}{i}),'r','-v7')  	
        c=physio_out.trace.oxy; 
-       save(sprintf('/data/pt_life_restingstate_followup/physio/%s_oxy.mat', subjects{1}{i}),'c','-v7') 
+       save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_oxy.mat', subjects{1}{i}),'c','-v7') 
     end
     end
 

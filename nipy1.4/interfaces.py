@@ -329,6 +329,9 @@ class NiiWrangler(BaseInterface):
         nii_files = self.inputs.nii_files
         smap = self.inputs.series_map
         dinfo = self.inputs.dicom_info
+
+	#print nii_files
+	#print dinfo
         #block_averaging = self.inputs.block_struct_averaging
         s_num_reg = re.compile(".*s(\d+)a(?!.*/)") # sux to use filename. make more robust if needed.
         nii_by_series = {}
@@ -358,7 +361,8 @@ class NiiWrangler(BaseInterface):
             m_count += 1
             m[0]["nifti_file"] = fn
         if not m_count == len(dinfo):
-            raise ValueError("incorrect number of nifti->series matches (%d/%d)" % (m_count, len(dinfo)))
+		print("incorrect number of nifti->series matches (%d/%d)" % (m_count, len(dinfo)))           
+		#raise ValueError("incorrect number of nifti->series matches (%d/%d)" % (m_count, len(dinfo)))
         
         # time for some data wrangling
         nf = "nifti_file"
