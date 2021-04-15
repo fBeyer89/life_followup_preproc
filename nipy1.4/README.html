@@ -596,11 +596,29 @@ pre.editor-colors .fold-marker:after {
 </li>
 </ul>
 <p>Based on the implementation of HCP pipelines for nipype (<a href="https://github.com/beOn/hcpre">https://github.com/beOn/hcpre</a>)</p>
-<p> <strong>Connect to generation 5 server</strong><br><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">getserver -sL -g5</code></p>
-<p><strong>Load software packages and nipype version 1.2.0</strong><br><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FSL --version 5.0.11 FREESURFER --version 5.3.0</code></p>
-<p><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source activate agewell_nip1.2</code></p>
-<p>For DWI QC FSL --version 6.0.1 is needed.</p>
-<p>To run the workflow:
-<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf</code></p>
-<p>working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)</p></body>
+<p><strong>How to run</strong></p>
+<ol>
+<li><p>Connect to generation 5 server**  (if still available)<br><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">getserver -sL -g5</code></p>
+</li>
+<li><p>Load software packages using <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">./environment_FSL5.0.11.sh</code>
+which will load <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FSL --version 5.0.11 FREESURFER --version 5.3.0</code></p>
+</li>
+<li><p>activate Python 2.7 with nipype version 1.2.0 (and other packages) in
+<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source activate agewell_nip1.2</code></p>
+</li>
+</ol>
+<p><em>if generation 5 is not available</em></p>
+<ol>
+<li>Connect to generation 6 server <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">getserver -sL -g6</code></li>
+<li>Load software packages using <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">./environment_FSL5.0.11_g6server.sh</code>
+which will load <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">MRICRON AFNI --version '19.1.05' ANTSENV --version '2.3.1' FSL --version 5.0.11 FREESURFER --version 5.3.0</code> (a different ANTS and AFNI version)</li>
+<li>activate Python 2.7 with nipype version 1.2.0 (and other packages) in
+<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source activate agewell_nip1.2</code></li>
+</ol>
+<ol start="4">
+<li>To run the workflow:
+<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf</code></li>
+</ol>
+<p>working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)</p>
+<p>For DWI QC FSL --version 6.0.1 is needed.</p></body>
       </html>

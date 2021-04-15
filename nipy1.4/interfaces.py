@@ -297,6 +297,11 @@ class NiiWranglerOutputSpec(TraitedSpec):
     ep_unwarp_dirs = traits.List(traits.Enum("x", "x-", "-x", "y", "y-", "-y", "z", "z-", "-z",),
             mandatory=True,
             desc="Length must match number of bold images.")
+    dicom_info = traits.List(
+            mandatory=True,
+            desc="one dict for each series in the session, in the order they were\
+                  run. each dict should contain at least the series_num (int) and\
+                  the series_desc (str). NiiWrangler writes nifti location here.")
 
 class NiiWrangler(BaseInterface):
     input_spec = NiiWranglerInputSpec
@@ -320,6 +325,7 @@ class NiiWrangler(BaseInterface):
         self.ep_dwi_echo_spacings = None
         self.ep_rsfmri_echo_spacings = None
         self.ep_unwarp_dirs = None
+        self.nii_info = []
 
     def _run_interface(self, runtime):
         import re
@@ -330,10 +336,11 @@ class NiiWrangler(BaseInterface):
         smap = self.inputs.series_map
         dinfo = self.inputs.dicom_info
 
-	#print nii_files
-	#print dinfo
+	    #print nii_files
+	    #print dinfo
         #block_averaging = self.inputs.block_struct_averaging
-        s_num_reg = re.compile(".*s(\d+)a(?!.*/)") # sux to use filename. make more robust if needed.
+        #s_num_reg = re.compile(".*s(\d+)a(?!.*/)") # for dcm2nii output
+        s_num_reg = re.compile(".*s(\d+)") #for dcm2niix output
         nii_by_series = {}
         fails = []
         extras = []
@@ -361,7 +368,7 @@ class NiiWrangler(BaseInterface):
             m_count += 1
             m[0]["nifti_file"] = fn
         if not m_count == len(dinfo):
-		print("incorrect number of nifti->series matches (%d/%d)" % (m_count, len(dinfo)))           
+		    print("incorrect number of nifti->series matches (%d/%d)" % (m_count, len(dinfo)))
 		#raise ValueError("incorrect number of nifti->series matches (%d/%d)" % (m_count, len(dinfo)))
         
         # time for some data wrangling
@@ -524,6 +531,8 @@ class NiiWrangler(BaseInterface):
             raise ValueError("Unabel to calculate dwi ep echo spacing. Try specifying manually in nii wrangler config section.")
         if ep_TR_fail:
             raise ValueError("Unabel to derive TR. Try specifying manually in nii wrangler config section.")
+
+        self.nii_info = dinfo
         return runtime
 
     def _list_outputs(self):
@@ -545,5 +554,6 @@ class NiiWrangler(BaseInterface):
         outputs["ep_dwi_echo_spacings"] = self.ep_dwi_echo_spacings
         outputs["ep_rsfmri_echo_spacings"] = self.ep_rsfmri_echo_spacings
         outputs["ep_unwarp_dirs"] = self.ep_unwarp_dirs
+        outputs["dicom_info"] = self.nii_info
         return outputs
-        
+

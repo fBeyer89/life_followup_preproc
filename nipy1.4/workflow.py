@@ -1,9 +1,10 @@
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-from nipype.interfaces.dcm2nii import Dcm2nii
+from nipype.interfaces.dcm2nii import Dcm2niix #using Dcm2nixx for BIDS conversion
 from nipype.interfaces.freesurfer import ReconAll
 from interfaces import *
+from bids.bids_interface import * #import bids conversion interface
 from config import *
 from util import *
 
@@ -44,6 +45,7 @@ class HCPrepWorkflow(pe.Workflow):
         vol_to_remove=self.get_conf("rspreproc","vol_to_remove")
         epi_resolution=self.get_conf("rspreproc","epi_resolution")
         ep_unwarp_dir=self.get_conf("rspreproc","ep_unwarp_dir")
+        bids_outputdir = self.get_conf("general", "bids_outputdir")
         #working_dir = self.get_conf("general","working_dir")     
         if sub_dir:
             self.dicom_grabber.inputs.base_directory = sub_dir
@@ -75,6 +77,8 @@ class HCPrepWorkflow(pe.Workflow):
             self.data_sink_dti.inputs.substitutions=[('_subject_', '')]
         if ep_unwarp_dir:
             self.resting.inputs.inputnode.pe_dir=ep_unwarp_dir
+        if bids_outputdir:
+            self.bids_converter.inputs.bids_outputdir = bids_outputdir
                             
         # nifti wrangler
         series_map = self.hc_config.get("series", {})
@@ -108,21 +112,26 @@ class HCPrepWorkflow(pe.Workflow):
             (self.dicom_grabber, self.dicom_convert, [("dicom", "source_names")]),
             (self.dicom_grabber, self.dicom_info, [("dicom", "files")]),
             (self.dicom_convert, self.nii_wrangler, [("converted_files", "nii_files")]),
-            (self.dicom_convert, self.data_sink, [("bvals", "nifti_fu.@bval")]),
-            (self.dicom_convert, self.data_sink, [("bvecs", "nifti_fu.@bvecs")]),
+            #(self.dicom_convert, self.data_sink, [("bvals", "nifti_fu.@bval")]),
+            #(self.dicom_convert, self.data_sink, [("bvecs", "nifti_fu.@bvecs")]),
             (self.dicom_info, self.nii_wrangler, [("info", "dicom_info")]),
-            (self.nii_wrangler, self.data_sink, [("t1", "nifti_fu.@t1")]), 
-            (self.nii_wrangler, self.data_sink, [("rsfmri", "nifti_fu.@rsfmri")]), 
-            (self.nii_wrangler, self.data_sink, [("mag_fieldmap", "nifti_fu.@mag_fieldmap")]),       
-            (self.nii_wrangler, self.data_sink, [("phase_fieldmap", "nifti_fu.@phase_fieldmap")]),    
-            (self.nii_wrangler, self.data_sink, [("dwi", "nifti_fu.@dwi")]), 
-            (self.nii_wrangler, self.data_sink, [("flair", "nifti_fu.@flair")]),
-            (self.nii_wrangler, self.data_sink, [("dwi_ap", "nifti_fu.@dwi_ap")]),  
-            (self.nii_wrangler, self.data_sink, [("dwi_pa", "nifti_fu.@dwi_pa")]), 
+            (self.dicom_convert, self.bids_converter, [("bvals", "bvals")]),
+            (self.dicom_convert, self.bids_converter, [("bvecs", "bvecs")]),
+            (self.dicom_convert, self.bids_converter, [('bids', 'bids_info')]),
+            (self.nii_wrangler, self.bids_converter, [('dicom_info', 'dicom_info')]),
+            (self.subjects_node, self.bids_converter, [('subject', 'subj')]),
+            # (self.nii_wrangler, self.data_sink, [("t1", "nifti_fu.@t1")]),
+            # (self.nii_wrangler, self.data_sink, [("rsfmri", "nifti_fu.@rsfmri")]),
+            # (self.nii_wrangler, self.data_sink, [("mag_fieldmap", "nifti_fu.@mag_fieldmap")]),
+            # (self.nii_wrangler, self.data_sink, [("phase_fieldmap", "nifti_fu.@phase_fieldmap")]),
+            # (self.nii_wrangler, self.data_sink, [("dwi", "nifti_fu.@dwi")]),
+            # (self.nii_wrangler, self.data_sink, [("flair", "nifti_fu.@flair")]),
+            # (self.nii_wrangler, self.data_sink, [("dwi_ap", "nifti_fu.@dwi_ap")]),
+            # (self.nii_wrangler, self.data_sink, [("dwi_pa", "nifti_fu.@dwi_pa")]),
 
             #structural workflow
             (self.nii_wrangler, self.structural_wf, [("t1", "inputnode.anat")]),          
-            (self.subjects_node, self.structural_wf, [("subject", "inputnode.subject")]),
+            (self.bids_converter, self.structural_wf, [("pseudo", "inputnode.subject")]),
             (self.structural_wf, self.data_sink_rs, [('outputnode.brain', 'structural.@brain')]),
             (self.structural_wf, self.data_sink_rs, [('outputnode.anat_head', 'structural.@anat_head')]),
             (self.structural_wf, self.data_sink_rs, [('outputnode.brainmask', 'structural.@brainmask')]),
@@ -132,88 +141,88 @@ class HCPrepWorkflow(pe.Workflow):
             
             #diffusion workflow
 
-            (self.structural_wf, self.dwi_wf, [("outputnode.subject_id", "inputnode.subject_id")]),
-            (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
-            (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
-            (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
-            (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
-            (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
-            
-            (self.dicom_convert, self.data_sink_dti, [("bvals", "diffusion.@bval")]),
-            (self.dicom_convert, self.data_sink_dti, [("bvecs", "diffusion.@bvecs")]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.bo_brainmask', 'diffusion.@b0_mask')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_corr', 'diffusion.@topup_corr')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_field', 'diffusion.@topup_field')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.total_movement_rms', 'diffusion.@total_movement_rms')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.outlier_report', 'diffusion.@outlier_report')]),
-	        (self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_params', 'diffusion.@eddy_params')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.shell_alignment_parameters', 'diffusion.@shell_alignment_parameters')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.cnr_maps', 'diffusion.@cnr_maps')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.residuals', 'diffusion.@residuals')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_md', 'diffusion.@dti_md')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l2', 'diffusion.@dti_l2')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l3', 'diffusion.@dti_l3')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat', 'diffusion.@fa2anat')]),
-            (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat_dat', 'diffusion.@fa2anat_dat')]),
-        	   (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat_mat', 'diffusion.@fa2anat_mat')]),
-                        
-            #functional
-            (self.structural_wf, self.resting, [("outputnode.subject_id", "inputnode.subject_id")]),
-            (self.nii_wrangler, self.resting, [("rsfmri", "inputnode.func")]),    
-            (self.nii_wrangler, self.resting, [("mag_fieldmap", "inputnode.fmap_mag")]), 
-            (self.nii_wrangler, self.resting, [("phase_fieldmap", "inputnode.fmap_phase")]),
-            (self.structural_wf, self.resting, [('outputnode.brain', 'inputnode.anat_brain')]),
-            (self.structural_wf, self.resting, [('outputnode.anat_head', 'inputnode.anat_head')]),
-            (self.structural_wf, self.resting, [('outputnode.brainmask', 'inputnode.anat_brain_mask')]),
-            (self.nii_wrangler, self.resting, [("fieldmap_te", "inputnode.te_diff")]),
-            (self.nii_wrangler, self.resting, [("ep_rsfmri_echo_spacings", "inputnode.echo_space")]),
-            (self.nii_wrangler, self.resting, [("ep_TR", "inputnode.TR")]),
-          
-            #sink
-            (self.resting,self.data_sink_rs, [('outputnode.tsnr','resting.moco.@tsnr_file')]),
-            (self.resting,self.data_sink_rs, [('outputnode.realigned_ts','resting.moco.@realigned_ts')]),
-            (self.resting,self.data_sink_rs, [('outputnode.par','resting.moco.@realignment_parameters_file')]),
-            (self.resting,self.data_sink_rs, [('outputnode.rms','resting.moco.@rms')]),
-            (self.resting,self.data_sink_rs, [('outputnode.mean_epi','resting.moco.@mean_epi')]),
-            (self.resting,self.data_sink_rs, [('outputnode.unwarped_mean_epi2fmap','resting.unwarp.@mean_epi_file_unwarped')]),
-            (self.resting,self.data_sink_rs, [('outputnode.coregistered_epi2fmap','resting.unwarp.@mean_epi_file')]),
-            (self.resting,self.data_sink_rs, [('outputnode.fmap','resting.unwarp.@fmap')]),
-            (self.resting,self.data_sink_rs, [('outputnode.fmap_fullwarp','resting.unwarp.@fmap_fullwarp')]),
-            (self.resting,self.data_sink_rs, [('outputnode.epi2anat_dat','resting.anat_coreg.@reg_file')]),
-            (self.resting,self.data_sink_rs, [('outputnode.epi2anat','resting.anat_coreg.@epi2anat')]),
-            (self.resting,self.data_sink_rs, [('outputnode.epi2anat_mat','resting.anat_coreg.@epi2anat_mat')]),
-            (self.resting,self.data_sink_rs, [('outputnode.full_transform_ts','resting.transform_ts.@full_transform_ts')]),
-            (self.resting,self.data_sink_rs, [('outputnode.full_transform_mean','resting.transform_ts.@full_transform_mean')]),
-            (self.resting,self.data_sink_rs, [('outputnode.resamp_brain','resting.transform_ts.@resamp_brain')]),
-            (self.resting,self.data_sink_rs, [('outputnode.resamp_brain_mask','resting.transform_ts.@resamp_brain_mask')]),
-            (self.resting,self.data_sink_rs, [('outputnode.detrended_epi','resting.transform_ts.@detrended_epi')]),
-            #report
-            (self.subjects_node, self.report, [("subject", "inputnode.subject")]),
-            (self.resting,self.report, [('outputnode.tsnr','inputnode.tsnr_file')]),
-            (self.resting,self.report, [('outputnode.dvars_file','inputnode.dvars_file')]),
-            (self.resting,self.report, [('outputnode.par','inputnode.realignment_parameters_file')]),
-            (self.resting,self.report, [('outputnode.unwarped_mean_epi2fmap','inputnode.mean_epi_file_unwarped')]),
-            (self.resting,self.report, [('outputnode.coregistered_epi2fmap','inputnode.mean_epi_file')]),
-            (self.resting,self.report, [('outputnode.epi2anat_dat','inputnode.reg_file')]),
-            (self.nii_wrangler, self.report, [("dwi", "inputnode.dwi_file")]), 
-            (self.nii_wrangler, self.report, [("flair", "inputnode.flair_file")]),
-            (self.dicom_convert, self.report, [("bvals", "inputnode.bvals")]),
-            (self.dicom_convert, self.report, [("bvecs", "inputnode.bvecs")]),
-            (self.dwi_wf, self.report, [('outputnode.fa2anat_dat', 'inputnode.reg_file_dwi')]),
-            (self.dwi_wf, self.report, [('outputnode.dti_fa', 'inputnode.FA_file')]),
-            (self.structural_wf, self.report, [('outputnode.wmseg','inputnode.wm_file')]),
-            (self.structural_wf, self.report, [('outputnode.brainmask','inputnode.brain_mask')]),
-            (self.structural_wf, self.report, [('outputnode.anat_head','inputnode.T1')])
+            # (self.structural_wf, self.dwi_wf, [("outputnode.subject_id", "inputnode.subject_id")]),
+            # (self.nii_wrangler, self.dwi_wf, [("dwi", "inputnode.dwi")]),
+            # (self.nii_wrangler, self.dwi_wf, [("dwi_ap", "inputnode.dwi_ap")]),
+            # (self.nii_wrangler, self.dwi_wf, [("dwi_pa", "inputnode.dwi_pa")]),
+            # (self.dicom_convert, self.dwi_wf, [("bvals", "inputnode.bvals")]),
+            # (self.dicom_convert, self.dwi_wf, [("bvecs", "inputnode.bvecs")]),
+            #
+            # (self.dicom_convert, self.data_sink_dti, [("bvals", "diffusion.@bval")]),
+            # (self.dicom_convert, self.data_sink_dti, [("bvecs", "diffusion.@bvecs")]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_denoised', 'diffusion.@dwi_denoised')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dwi_unringed', 'diffusion.@dwi_unringed')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.bo_brainmask', 'diffusion.@b0_mask')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_corr', 'diffusion.@topup_corr')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_field', 'diffusion.@topup_field')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.topup_fieldcoef', 'diffusion.@topup_fieldcoef')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.rotated_bvecs', 'diffusion.@rotated_bvecs')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.total_movement_rms', 'diffusion.@total_movement_rms')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.outlier_report', 'diffusion.@outlier_report')]),
+	        # (self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_corr', 'diffusion.@eddy_corr')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.eddy_params', 'diffusion.@eddy_params')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.shell_alignment_parameters', 'diffusion.@shell_alignment_parameters')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.cnr_maps', 'diffusion.@cnr_maps')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.residuals', 'diffusion.@residuals')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_fa', 'diffusion.@dti_fa')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_md', 'diffusion.@dti_md')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l1', 'diffusion.@dti_l1')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l2', 'diffusion.@dti_l2')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_l3', 'diffusion.@dti_l3')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v1', 'diffusion.@dti_v1')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v2', 'diffusion.@dti_v2')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.dti_v3', 'diffusion.@dti_v3')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat', 'diffusion.@fa2anat')]),
+            # (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat_dat', 'diffusion.@fa2anat_dat')]),
+        	#    (self.dwi_wf, self.data_sink_dti, [('outputnode.fa2anat_mat', 'diffusion.@fa2anat_mat')]),
+            #
+            # #functional
+            # (self.structural_wf, self.resting, [("outputnode.subject_id", "inputnode.subject_id")]),
+            # (self.nii_wrangler, self.resting, [("rsfmri", "inputnode.func")]),
+            # (self.nii_wrangler, self.resting, [("mag_fieldmap", "inputnode.fmap_mag")]),
+            # (self.nii_wrangler, self.resting, [("phase_fieldmap", "inputnode.fmap_phase")]),
+            # (self.structural_wf, self.resting, [('outputnode.brain', 'inputnode.anat_brain')]),
+            # (self.structural_wf, self.resting, [('outputnode.anat_head', 'inputnode.anat_head')]),
+            # (self.structural_wf, self.resting, [('outputnode.brainmask', 'inputnode.anat_brain_mask')]),
+            # (self.nii_wrangler, self.resting, [("fieldmap_te", "inputnode.te_diff")]),
+            # (self.nii_wrangler, self.resting, [("ep_rsfmri_echo_spacings", "inputnode.echo_space")]),
+            # (self.nii_wrangler, self.resting, [("ep_TR", "inputnode.TR")]),
+            #
+            # #sink
+            # (self.resting,self.data_sink_rs, [('outputnode.tsnr','resting.moco.@tsnr_file')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.realigned_ts','resting.moco.@realigned_ts')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.par','resting.moco.@realignment_parameters_file')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.rms','resting.moco.@rms')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.mean_epi','resting.moco.@mean_epi')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.unwarped_mean_epi2fmap','resting.unwarp.@mean_epi_file_unwarped')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.coregistered_epi2fmap','resting.unwarp.@mean_epi_file')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.fmap','resting.unwarp.@fmap')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.fmap_fullwarp','resting.unwarp.@fmap_fullwarp')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.epi2anat_dat','resting.anat_coreg.@reg_file')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.epi2anat','resting.anat_coreg.@epi2anat')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.epi2anat_mat','resting.anat_coreg.@epi2anat_mat')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.full_transform_ts','resting.transform_ts.@full_transform_ts')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.full_transform_mean','resting.transform_ts.@full_transform_mean')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.resamp_brain','resting.transform_ts.@resamp_brain')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.resamp_brain_mask','resting.transform_ts.@resamp_brain_mask')]),
+            # (self.resting,self.data_sink_rs, [('outputnode.detrended_epi','resting.transform_ts.@detrended_epi')]),
+            # #report
+            # (self.subjects_node, self.report, [("subject", "inputnode.subject")]),
+            # (self.resting,self.report, [('outputnode.tsnr','inputnode.tsnr_file')]),
+            # (self.resting,self.report, [('outputnode.dvars_file','inputnode.dvars_file')]),
+            # (self.resting,self.report, [('outputnode.par','inputnode.realignment_parameters_file')]),
+            # (self.resting,self.report, [('outputnode.unwarped_mean_epi2fmap','inputnode.mean_epi_file_unwarped')]),
+            # (self.resting,self.report, [('outputnode.coregistered_epi2fmap','inputnode.mean_epi_file')]),
+            # (self.resting,self.report, [('outputnode.epi2anat_dat','inputnode.reg_file')]),
+            # (self.nii_wrangler, self.report, [("dwi", "inputnode.dwi_file")]),
+            # (self.nii_wrangler, self.report, [("flair", "inputnode.flair_file")]),
+            # (self.dicom_convert, self.report, [("bvals", "inputnode.bvals")]),
+            # (self.dicom_convert, self.report, [("bvecs", "inputnode.bvecs")]),
+            # (self.dwi_wf, self.report, [('outputnode.fa2anat_dat', 'inputnode.reg_file_dwi')]),
+            # (self.dwi_wf, self.report, [('outputnode.dti_fa', 'inputnode.FA_file')]),
+            # (self.structural_wf, self.report, [('outputnode.wmseg','inputnode.wm_file')]),
+            # (self.structural_wf, self.report, [('outputnode.brainmask','inputnode.brain_mask')]),
+            # (self.structural_wf, self.report, [('outputnode.anat_head','inputnode.T1')])
             
      
             ])
@@ -248,18 +257,29 @@ class HCPrepWorkflow(pe.Workflow):
     def dicom_grabber(self, val):
         self._dicom_grabber = val
 
+    # deprecated DCM2nii because json files are needed for BIDS
+    # @property
+    # def dicom_convert(self):
+    #     if not getattr(self,"_dicom_convert",None):
+    #         #self._dicom_convert = pe.Node(name="dicom_convert", interface=Dcm2nii())
+    #         self._dicom_convert = pe.Node(name="dicom_convert", interface=HCDcm2nii())
+    #         #self._dicom_convert.inputs.convert_all_pars = True
+    #         self._dicom_convert.inputs.gzip_output = False
+    #         self._dicom_convert.inputs.reorient = False
+    #         self._dicom_convert.inputs.reorient_and_crop = False
+    #         self._dicom_convert.inputs.events_in_filename=True
+    #         self._dicom_convert.inputs.protocol_in_filename=True
+    #         self._dicom_convert.inputs.date_in_filename= False
+    #     return self._dicom_convert
+    # @dicom_convert.setter
+    # def dicom_convert(self, val):
+    #     self._dicom_convert = val
+
     @property
     def dicom_convert(self):
         if not getattr(self,"_dicom_convert",None):
-            #self._dicom_convert = pe.Node(name="dicom_convert", interface=Dcm2nii())
-            self._dicom_convert = pe.Node(name="dicom_convert", interface=HCDcm2nii())
-            #self._dicom_convert.inputs.convert_all_pars = True
-            self._dicom_convert.inputs.gzip_output = False
-            self._dicom_convert.inputs.reorient = False
-            self._dicom_convert.inputs.reorient_and_crop = False
-            self._dicom_convert.inputs.events_in_filename=True
-            self._dicom_convert.inputs.protocol_in_filename=True
-            self._dicom_convert.inputs.date_in_filename= False
+            self._dicom_convert = pe.Node(name="dicom_convert", interface=Dcm2niix())
+            self._dicom_convert.inputs.out_filename="%p_s%s"
         return self._dicom_convert
     @dicom_convert.setter
     def dicom_convert(self, val):
@@ -291,6 +311,15 @@ class HCPrepWorkflow(pe.Workflow):
     @nii_wrangler.setter
     def nii_wrangler(self, val):
         self._nii_wrangler = val
+
+    @property
+    def bids_converter(self):
+        if not getattr(self,'_bids_converter',None):
+            self._bids_converter = pe.Node(name="bids_converter", interface=BidsConvert())
+        return self._bids_converter
+    @bids_converter.setter
+    def bids_converter(self, val):
+        self._bids_converter = val
         
     @property
     def structural_wf(self):
