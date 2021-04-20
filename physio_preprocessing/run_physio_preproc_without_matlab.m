@@ -1,5 +1,5 @@
 %add tapas toolbox to path
-addpath(genpath('/data/pt_life/data_fbeyer/spm-fbeyer'))
+addpath(genpath('/data/u_fbeyer_software/spm-fbeyer'))
 
 
 

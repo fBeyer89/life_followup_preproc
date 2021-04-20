@@ -596,15 +596,47 @@ pre.editor-colors .fold-marker:after {
 </li>
 </ul>
 <p>Based on the implementation of HCP pipelines for nipype (<a href="https://github.com/beOn/hcpre">https://github.com/beOn/hcpre</a>)</p>
-<p><strong>How to run</strong></p>
+<h2 id="how-to-run-the-preprocessing-workflow">How to run the preprocessing workflow</h2>
+<h3 id="prerequisite">Prerequisite:</h3>
+<ul>
+<li><p>python2.7 environment with all packages listed in <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/nipy1.4/requirements.txt</code></p>
+</li>
+<li><p>The environment may be installed in different ways:</p>
+</li>
+</ul>
 <ol>
-<li><p>Connect to generation 5 server**  (if still available)<br><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">getserver -sL -g5</code></p>
+<li><p>use <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">virtualenv</code> to create a virtual environment. This is a most basic version control tool for Python 2.7. Detailed instructions can be found <a href="https://packaging.python.org/tutorials/installing-packages/">here</a>.</p>
+<ul>
+<li>create a directory where your virtualenv should live <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/home/user/myvirtualenv</code></li>
+<li>test that you have <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">pip</code> installed in your python version by typing <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python -m pip --version</code> (should say <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">pip 9.0.1 from /usr/lib/python2.7/dist-packages (python 2.7)</code>)</li>
+<li>install virtualenv to your default institute python 2.7 version by typing <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python -m pip install virtualenv</code></li>
+<li>create your own virualenvironment by typing <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python -m virtualenv /home/user/myvirtualenv</code></li>
+<li>activate this environment by typing <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source /home/user/myvirtualenv/bin/activate</code></li>
+<li>now you are using python with this environment and may install all desired packages into it</li>
+<li><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/nipy1.4/requirements.txt</code> tells you which packages you need</li>
+<li>run <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python -m pip install -r requirements.txt</code></li>
+<li>now you can use this virtual environment in any session after <strong>activating</strong> it with <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source /home/user/myvirtualenv/bin/activate</code></li>
+</ul>
+</li>
+</ol>
+<ol start="2">
+<li>use <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">miniconda</code> for version control.<ul>
+<li>install <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">miniconda</code> into a local directory. For detailed instructions see <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html">here</a></li>
+<li>create a Python 2.7 environment using <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">conda create -y --name myenv python=2.7</code>. This environment will be located in your local conda directory</li>
+<li>now add the required packages using <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">conda install --force-reinstall -y -q --name myenv -c conda-forge --file requirements.txt</code></li>
+<li>if not everything can be installed via <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">conda install</code>, activate your environment <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source activate myenv</code> and use <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">pip install -r /data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/nipy1.4/requirements.txt</code> to install the missing packages</li>
+<li>now you can use this virtual environment in any session after <strong>activating</strong> it with <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source activate myenv</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="step-by-step">Step-by-step</h3>
+<ol>
+<li><p>Connect to generation 5 server  (if still available)<br><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">getserver -sL -g5</code></p>
 </li>
 <li><p>Load software packages using <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">./environment_FSL5.0.11.sh</code>
 which will load <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">MRICRON AFNI --version '17.2.17' ANTSENV --version '2.2.0' FSL --version 5.0.11 FREESURFER --version 5.3.0</code></p>
 </li>
-<li><p>activate Python 2.7 with nipype version 1.2.0 (and other packages) in
-<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source activate agewell_nip1.2</code></p>
+<li><p>activate the virtual Python environment (see above)</p>
 </li>
 </ol>
 <p><em>if generation 5 is not available</em></p>
@@ -612,13 +644,22 @@ which will load <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mon
 <li>Connect to generation 6 server <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">getserver -sL -g6</code></li>
 <li>Load software packages using <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">./environment_FSL5.0.11_g6server.sh</code>
 which will load <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">MRICRON AFNI --version '19.1.05' ANTSENV --version '2.3.1' FSL --version 5.0.11 FREESURFER --version 5.3.0</code> (a different ANTS and AFNI version)</li>
-<li>activate Python 2.7 with nipype version 1.2.0 (and other packages) in
-<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">source activate agewell_nip1.2</code></li>
+<li>activate the virtual Python environment (see above)</li>
 </ol>
 <ol start="4">
-<li>To run the workflow:
-<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf</code></li>
+<li>To run the workflow:<ul>
+<li>modify the subjects you want to run in <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/nipy1.4/conf_for_LIFE_FU_*.conf</code> (first line)</li>
+<li>run the workflow in the terminal you set up above with <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf</code></li>
+<li>if there is more than one file <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">*.conf</code> you will be prompted to select the file on the keyboard. It may take a while until all available files are identified.</li>
+<li>now everything runs :)</li>
+</ul>
+</li>
 </ol>
-<p>working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)</p>
-<p>For DWI QC FSL --version 6.0.1 is needed.</p></body>
+<h3 id="some-additional-information">Some additional information</h3>
+<ul>
+<li><p>working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)</p>
+</li>
+<li><p>for QC workflows, especially the DWI QC (the bash script<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/DWI/run_eddyqc_subject.sh</code>), you need to activate FSL --version 6.0.1</p>
+</li>
+</ul></body>
       </html>

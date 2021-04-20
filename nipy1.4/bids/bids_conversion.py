@@ -18,10 +18,10 @@ def juggle_subj(subject, bids_outputdir):
         print "no pseudonym found"
         pseudo = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
         print pseudo
-        tmp = pd.read_csv("/data/gh_gr_agingandobesity_share/life_shared/Analysis/Data_Organization/lifebids/new_pseudos.csv")
+        tmp = pd.read_csv("/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/lifebids/new_pseudos.csv")
         tmp = tmp.append({"sic":subject, "pseudo": pseudo}, ignore_index=True)
         print tmp
-        tmp.to_csv("/data/gh_gr_agingandobesity_share/life_shared/Analysis/Data_Organization/lifebids/new_pseudos.csv")
+        tmp.to_csv("/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/lifebids/new_pseudos.csv")
     else:
         pseudo = tmp.get_values()[0]
 
