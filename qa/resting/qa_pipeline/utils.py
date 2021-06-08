@@ -128,8 +128,6 @@ def calc_frame_displacement(realignment_parameters_file, parameter_source):
     fn=os.getcwd()+'/fd.txt'
     np.savetxt(fn, FD_power)
     
-    print(np.shape(FD_power))
-    print(fn)
     return FD_power, fn
 
 
@@ -163,9 +161,9 @@ def make_the_plot(func, seg, tr, fd_thres, outliers, dvars, fd, subj, outfile):
     'FD': [0.0] + np.loadtxt(fd, skiprows=1, usecols=[0]).tolist(),
     })
 
-    if os.path.isfile('/data/pt_life_restingstate_followup/physio/%s_resp.mat' %(subj)):
+    if os.path.isfile('/data/pt_life_restingstate_followup/Data/physio/%s_resp.mat' %(subj)):
         print("respiration file is present")
-        resp=sio.loadmat('/data/pt_life_restingstate_followup/physio/%s_resp.mat' %(subj))
+        resp=sio.loadmat('/data/pt_life_restingstate_followup/Data/physio/%s_resp.mat' %(subj))
         r=resp.get('r')
         r=r.flatten()
         r=r[4:]

@@ -583,19 +583,22 @@ pre.editor-colors .fold-marker:after {
 </style>
         </head>
         <body class='markdown-preview' data-use-github-style><h1 id="life_followup_preproc">life_followup_preproc</h1>
-<p>Preprocessing pipelines for the LIFE-Adult Followup assessment (based on HCP pipeline)</p>
+<p>Preprocessing pipelines for the LIFE-Adult Followup assessment (based on <a href="(https://github.com/beOn/hcpre)">HCP pipeline</a>)</p>
 <ul>
-<li><p>Structural preprocessing: with Freesurfer + registration to MNI152 1mm space</p>
+<li><p>BIDS conversion: copies NIFTI &amp; corresponding .json files into <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/p_life_raw/bids</code> (functions and subworkflows in: <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">bids</code>)</p>
 </li>
-<li><p>Functional (rsfMRI) preprocessing: removal of first 4 volumes, motion correction (MCFlirt), coregistration to anatomical (BBREGISTER)
-, unwarping (FUGUE) applied in a single step, removal of linear trend.</p>
+<li><p>Structural preprocessing: with Freesurfer + registration to MNI152 1mm space (functions and subworkflows in: <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">structural</code>)</p>
 </li>
-<li><p>Diffusion MRI preprocessing: artefacts correction including denoising (MRTrix: dwidenoise) and Gibb's ringing removal (MRTrix: mrdegibbs); field distortion correction (FSL: topup); motion correction and outliner replacement (FSL: eddy); tensor model fitting (FSL: dtifit)</p>
+<li><p>Functional (rsfMRI) preprocessing: removal of first 4 volumes, motion correction (MCFlirt), coregistration to anatomical (BBREGISTER), unwarping (FUGUE) applied in a single step, removal of linear trend. (functions and subworkflows in: <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">functional</code>)</p>
 </li>
-<li><p>Creating a report for quick overview of the data.</p>
+<li><p>Diffusion MRI preprocessing: artefacts correction including denoising (MRTrix: dwidenoise) and Gibb's ringing removal (MRTrix: mrdegibbs); field distortion correction (FSL: topup); motion correction and outliner replacement (FSL: eddy); tensor model fitting (FSL: dtifit)(functions and subworkflows in: <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">diffusion</code>)</p>
+</li>
+<li><p>Creating a report for quick overview of the data.(functions and subworkflows in: <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">reports</code>)</p>
 </li>
 </ul>
-<p>Based on the implementation of HCP pipelines for nipype (<a href="https://github.com/beOn/hcpre">https://github.com/beOn/hcpre</a>)</p>
+<h3 id="other-folders">Other folders</h3>
+<p><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">workflow_redo_eddy</code>: modules to rerun workflow with other eddy settings (was previously used, now eddy settings in the main workflow are adapted)</p>
+<p><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">conf_files</code>: previously used config files.</p>
 <h2 id="how-to-run-the-preprocessing-workflow">How to run the preprocessing workflow</h2>
 <h3 id="prerequisite">Prerequisite:</h3>
 <ul>
@@ -649,17 +652,25 @@ which will load <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mon
 <ol start="4">
 <li>To run the workflow:<ul>
 <li>modify the subjects you want to run in <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/nipy1.4/conf_for_LIFE_FU_*.conf</code> (first line)</li>
+<li>working directory is defined in <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">run_workflow_hcplike.py</code>, ll.76: <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">working_dir=/data/pt_life/LIFE_fu_wd/</code> (don't change, unless directory is full). Here, all intermediate steps are saved, this is why when rerunning the workflow it will only re-run steps for which the script has been altered.</li>
 <li>run the workflow in the terminal you set up above with <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf</code></li>
 <li>if there is more than one file <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">*.conf</code> you will be prompted to select the file on the keyboard. It may take a while until all available files are identified.</li>
-<li>now everything runs :)</li>
+<li>now everything runs :)      </li>
 </ul>
 </li>
 </ol>
-<h3 id="some-additional-information">Some additional information</h3>
-<ul>
-<li><p>working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)</p>
+<ol start="5">
+<li>After the workflow has finished<ul>
+<li>check for error logfiles (<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">*.pklz</code>) and try to solve issues</li>
+<li>check regularly whether<ul>
+<li>subjects were scanned at followup who did not have a baseline assessment (table: <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/lifebids/new_pseudos.csv</code>) and add them to the BIDS participants file, if necessary (<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/p_life_raw/bids/participants.ods</code>)</li>
+<li>there is enough space in working directory, freesurfer directory and bids directory, otherwise ask IT for more disk space.</li>
+</ul>
 </li>
-<li><p>for QC workflows, especially the DWI QC (the bash script<code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/DWI/run_eddyqc_subject.sh</code>), you need to activate FSL --version 6.0.1</p>
+<li><em>optionally</em>: check the output report files in <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/p_life_raw/documents/fu_reports/</code> for a quick glance on data quality</li>
+<li>create extensive QA files for resting-state and DWI data (see <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/</code> for HowTos)</li>
+<li>bidsify Physio data (see <code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, monospace;">bids/physio2bids/</code> for HowTo)</li>
+</ul>
 </li>
-</ul></body>
+</ol></body>
       </html>

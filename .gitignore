@@ -1,8 +1,9 @@
 nipy1.4/crash*
 .Rhistory
-qa/__pycache__/*
+qa/resting/__pycache__/*
 qa/extraQA/__pycache__/*
 nipy1.4/conf_files
 nipy1.4/conf*
+nipy1.4/*/*.pyc
 nipy1.4/.idea/*
 */*check*

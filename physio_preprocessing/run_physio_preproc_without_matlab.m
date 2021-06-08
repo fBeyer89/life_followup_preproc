@@ -4,7 +4,7 @@ addpath(genpath('/data/u_fbeyer_software/spm-fbeyer'))
 
 
 %Specify variables
-subjects_file='/data/pt_life_restingstate_followup/Results/Summaries/qa_check2021/usable_physio_data.txt'
+subjects_file='/data/pt_life_restingstate_followup/Results/Summaries/qa_check2021/all_physio_data.txt';
 
 subjID = fopen(subjects_file);
 subjects=textscan(subjID,'%s');
@@ -65,7 +65,7 @@ physio_in.model.noise_rois.include=0;
 physio_in.model.movement.include=0;
 
 physio_in.ons_secs = [];
-physio_in.verbose.level = 4;
+physio_in.verbose.level = 0;
 physio_in.verbose.process_log = cell(0,1); 
                                 % stores text outputs of PhysIO Toolbox
                                 % processing, e.g. warnings about missed
@@ -73,14 +73,19 @@ physio_in.verbose.process_log = cell(0,1);
 physio_in.verbose.fig_handles = zeros(0,1);  
 
 
-for i=468:469%size(subjects{1},1) 
+for i=860:size(subjects{1},1) 
     
-    subjects{1}{i};
+    sprintf("Subject number: %i and ID: %s", i,subjects{1}{i})
 
     
     %%exclude participants with faulty data based on file size/error during
     %%processing (not used as input is only "clean data")
-    if subjects{1}{i}=="LI02271832"%||subjects{1}{i}=="LI02692576"
+    if subjects{1}{i}=="LI02271832"||subjects{1}{i}=="LI00143114"||subjects{1}{i}=="LI00706330"||...
+        subjects{1}{i}=="LI00552556"||subjects{1}{i}=="LI00605658"||subjects{1}{i}=="LI00752733"||...
+        subjects{1}{i}=="LI0127843X"||subjects{1}{i}=="LI02692576"||subjects{1}{i}=="LI03736172"||...
+        subjects{1}{i}=="LI03436577"||subjects{1}{i}=="LI03403894"||subjects{1}{i}=="LI00647018"||...
+        subjects{1}{i}=="LI02478671"||subjects{1}{i}=="LI0353619X"||subjects{1}{i}=="LI02550372"||...
+        subjects{1}{i}=="LI00640890"||subjects{1}{i}=="LI00958910"||subjects{1}{i}=="LI03413232"
        continue
     else
     %subject dependent saving options
@@ -135,10 +140,10 @@ for i=468:469%size(subjects{1},1)
         if length(files)>1
             %find which one is the resting state scan (eg the earlier one)
             if datetime(files(1).date)<datetime(files(2).date)
-                sprintf("the first data point is the earlier one")
+                %sprintf("the first data point is the earlier one")
                 physio_in.log_files.cardiac=sprintf("%s/%s",files(1).folder,files(1).name);
             else
-                sprintf("the last data point is the earlier one") 
+                %sprintf("the last data point is the earlier one") 
                 physio_in.log_files.cardiac=sprintf("%s/%s",files(2).folder,files(2).name);
             end 
        else
@@ -152,12 +157,18 @@ for i=468:469%size(subjects{1},1)
     if (res(i,1)~=0&&res(i,2)~=0)
        %create & run physio file
        physio = tapas_physio_new('empty', physio_in);
-       [physio_out, R, ons_secs] = tapas_physio_main_create_regressors(physio);
- 
+       [physio_out, R, ons_secs, resp] = tapas_physio_main_create_regressors(physio);
+
+       %saving resp and oxy trace to later visually compare to fMRI and
+       %head motion
        r=physio_out.trace.resp;
        save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_resp.mat', subjects{1}{i}),'r','-v7')  	
        c=physio_out.trace.oxy; 
        save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_oxy.mat', subjects{1}{i}),'c','-v7') 
+       
+       %save physio params in separate text file
+       phys_params=[resp,mean(ons_secs.hr)];
+       save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_RVT_RR_HR.txt', subjects{1}{i}),'phys_params', '-ascii', '-double', '-tabs');  	
     end
     end
 

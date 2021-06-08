@@ -28,3 +28,5 @@
 	This should not change the results but just enable saving all outputs, to run eddy_quad quality control (from FSL 6.0.1. At this point all participants assessed until now were rerun with `run_workflow_redo_eddy.py` to re-generate outputs (which only reruns diffusion pipeline)
 
 - 15.04.2021: modified workflow to use new IDs for FreeSurfer processing and BIDS conversion included in the workflow.
+
+- 21.04.2021: modified dimension along which images are selected in `reports` because of differences in conversion between dcm2nii and dcm2niix

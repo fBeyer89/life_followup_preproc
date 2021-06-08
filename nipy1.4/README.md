@@ -1,17 +1,21 @@
 # life_followup_preproc
 
-Preprocessing pipelines for the LIFE-Adult Followup assessment (based on HCP pipeline)
+Preprocessing pipelines for the LIFE-Adult Followup assessment (based on [HCP pipeline]((https://github.com/beOn/hcpre)))
 
-+ Structural preprocessing: with Freesurfer + registration to MNI152 1mm space
++ BIDS conversion: copies NIFTI & corresponding .json files into `/data/p_life_raw/bids` (functions and subworkflows in: `bids`)
 
-+ Functional (rsfMRI) preprocessing: removal of first 4 volumes, motion correction (MCFlirt), coregistration to anatomical (BBREGISTER)
-, unwarping (FUGUE) applied in a single step, removal of linear trend.
++ Structural preprocessing: with Freesurfer + registration to MNI152 1mm space (functions and subworkflows in: `structural`)
 
-+ Diffusion MRI preprocessing: artefacts correction including denoising (MRTrix: dwidenoise) and Gibb's ringing removal (MRTrix: mrdegibbs); field distortion correction (FSL: topup); motion correction and outliner replacement (FSL: eddy); tensor model fitting (FSL: dtifit)
++ Functional (rsfMRI) preprocessing: removal of first 4 volumes, motion correction (MCFlirt), coregistration to anatomical (BBREGISTER), unwarping (FUGUE) applied in a single step, removal of linear trend. (functions and subworkflows in: `functional`)
 
-+ Creating a report for quick overview of the data.
++ Diffusion MRI preprocessing: artefacts correction including denoising (MRTrix: dwidenoise) and Gibb's ringing removal (MRTrix: mrdegibbs); field distortion correction (FSL: topup); motion correction and outliner replacement (FSL: eddy); tensor model fitting (FSL: dtifit)(functions and subworkflows in: `diffusion`)
 
-Based on the implementation of HCP pipelines for nipype (https://github.com/beOn/hcpre)
++ Creating a report for quick overview of the data.(functions and subworkflows in: `reports`)
+
+### Other folders
+`workflow_redo_eddy`: modules to rerun workflow with other eddy settings (was previously used, now eddy settings in the main workflow are adapted)
+
+`conf_files`: previously used config files.
 
 ## How to run the preprocessing workflow
 
@@ -53,17 +57,23 @@ Based on the implementation of HCP pipelines for nipype (https://github.com/beOn
 
 *if generation 5 is not available*
  1. Connect to generation 6 server `getserver -sL -g6`
- 2. Load software packages using `./environment_FSL5.0.11_g6server.sh`
+ 2. Load software packages using `./environment_FSL5.0.11_g6servers.sh`
     which will load `MRICRON AFNI --version '19.1.05' ANTSENV --version '2.3.1' FSL --version 5.0.11 FREESURFER --version 5.3.0` (a different ANTS and AFNI version)
  3. activate the virtual Python environment (see above)
 
 4. To run the workflow:
   - modify the subjects you want to run in `/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/nipy1.4/conf_for_LIFE_FU_*.conf` (first line)
+  - working directory is defined in `run_workflow_hcplike.py`, ll.76: `working_dir=/data/pt_life/LIFE_fu/wd_preprocessing/` (don't change, unless directory is full). Here, all intermediate steps are saved, this is why when rerunning the workflow it will only re-run steps for which the script has been altered.
   - run the workflow in the terminal you set up above with `python run_workflow_hcplike.py --run -n 8 --config conf_for_LIFE_FU.conf `
   - if there is more than one file `*.conf` you will be prompted to select the file on the keyboard. It may take a while until all available files are identified.
-  - now everything runs :)
+  - now everything runs :)      
 
-### Some additional information
-- working directory is defined in "run_workflow_hcplike.py", ll.76: working_dir="/data/pt_life/LIFE_fu_wd/" (don't change, unless directory is full)
 
-- for QC workflows, especially the DWI QC (the bash script`/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/DWI/run_eddyqc_subject.sh`), you need to activate FSL --version 6.0.1
+5.  After the workflow has finished
+  - check for error logfiles (`*.pklz`) and try to solve issues
+  - check regularly whether
+      - subjects were scanned at followup who did not have a baseline assessment (table: `/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/lifebids/new_pseudos.csv`) and add them to the BIDS participants file, if necessary (`/data/p_life_raw/bids/participants.ods`)
+      - there is enough space in working directory, freesurfer directory and bids directory, otherwise ask IT for more disk space.
+  - *optionally*: check the output report files in `/data/p_life_raw/documents/fu_reports/` for a quick glance on data quality
+  - create extensive QA files for resting-state and DWI data (see `/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/` for HowTos)
+  - bidsify Physio data (see `bids/physio2bids/` for HowTo)

@@ -38,7 +38,7 @@ def plot_mosaic(nifti_file, image_type, overlay_mask = None,title=None, figsize=
         mean_data = nifti_file
    
     if image_type=='flair':
-            n_images = mean_data.shape[2]
+            n_images = mean_data.shape[0] #with dcm2niix the first dimension corresponds to y-axis
             step=8
             range_plot=np.arange(8,n_images-8,step)   
             row, col = _calc_rows_columns(figsize[0]/figsize[1], (n_images-16)/step)
@@ -71,7 +71,7 @@ def plot_mosaic(nifti_file, image_type, overlay_mask = None,title=None, figsize=
         if overlay_mask:
             ax.set_rasterized(True)
         if image_type=="flair":
-            ax.imshow(np.fliplr(mean_data[100:480,100:480,image].T), vmin=np.percentile(mean_data[data_mask], 0.5), 
+            ax.imshow(np.fliplr(mean_data[image,100:480,100:480].T), vmin=np.percentile(mean_data[data_mask], 0.5),
                       vmax=np.percentile(mean_data[data_mask],99.5), 
                       cmap=cm.Greys_r, interpolation='nearest', origin='lower')  # @UndefinedVariable
         elif image_type=="t1":

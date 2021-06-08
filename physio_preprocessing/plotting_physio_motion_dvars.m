@@ -4,15 +4,15 @@
 addpath(genpath('/data/pt_life/data_fbeyer/spm-fbeyer'))
 %create physio_in file
 %Specify variables
-subjects_file='/data/p_life_raw/scripts/Followup/life_FU_done_2019_02_26_09_39_03.txt';
+subjects_file='/data/pt_life_restingstate_followup/Results/Summaries/qa_check2021/all_physio_data.txt';
 %'/data/pt_life/data_fbeyer/genetics/analysis/young_and_old/connectome_project/old/794subjects.txt'
 
 subjID = fopen(subjects_file);
 subjects=textscan(subjID,'%s');
 
 all_res=zeros(size(subjects{1},1),15);
-
-for i=12:13%size(subjects{1},1)
+subjects={"LI05095916"}
+for i=1:1%size(subjects{1},1)
     
     %if subjects{1}{i}=="LI01273319"%for looking at plots of individual subjects
 
@@ -76,8 +76,8 @@ for i=12:13%size(subjects{1},1)
         end
         
         %PHYSIOLOGICAL data
-        if isfile(sprintf("/data/pt_life_restingstate_followup/physio/%s.mat", subjects{1}{i}))
-                phys_data=load(sprintf("/data/pt_life_restingstate_followup/physio/%s.mat", subjects{1}{i}));
+        if isfile(sprintf("/data/pt_life_restingstate_followup/Data/physio/%s.mat", subjects{1}{i}))
+                phys_data=load(sprintf("/data/pt_life_restingstate_followup/Data/physio/%s.mat", subjects{1}{i}));
 
                 %use respiratory and PPU traces resampled to volume acquisitions.
                 resp=phys_data.physio.trace.resp;

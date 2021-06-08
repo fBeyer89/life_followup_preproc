@@ -58,13 +58,20 @@ def create_rs_qc(subjectlist):
     ds_rs.inputs.template_args = info
     ds_rs.inputs.sort_filelist = True   
 
-    def rename_subject_for_fu(input_id):
-        output_id=input_id+"_fu"
-        return output_id
+    def juggle_subj(input_id):
+        import pandas as pd
+        from datetime import datetime as dt
+        import os
+        import random, string
+        
+        sic_pseudo=pd.read_csv("/data/gh_gr_agingandobesity_share/life_shared/Data/Preprocessed/derivatives/pseudo_mrt_20201214.csv")
+        tmp=sic_pseudo.loc[sic_pseudo.sic == input_id,'pseudonym']
+        pseudo = tmp.get_values()[0]+"_fu"
+        return pseudo
 
     rename=Node(util.Function(input_names=['input_id'],
                             output_names=['output_id'],
-                            function = rename_subject_for_fu), name="rename")
+                            function = juggle_subj), name="rename")
 
     get_fs=Node(nio.FreeSurferSource(), name="get_fs")
     get_fs.inputs.subjects_dir=freesurfer_dir
@@ -111,11 +118,11 @@ def create_rs_qc(subjectlist):
 
     
     datasink =Node(name="datasink", interface=nio.DataSink())
-    datasink.inputs.base_directory="/data/pt_life_restingstate_followup/results/"
+    datasink.inputs.base_directory="/data/pt_life_restingstate_followup/Results/QA"
     datasink.inputs.substitutions=[('_subject_', '')]
     
     qc.connect([(identitynode, rename,[('subject', 'input_id')]),
-		(rename, get_fs, [('output_id', 'subject_id')]),
+		       (rename, get_fs, [('output_id', 'subject_id')]),
                 (identitynode, ds_rs, [('subject', 'subj')]),
                 (identitynode, bigplot, [('subject', 'subj')]),
                 (get_fs, get_correct_aseg, [('aparc_aseg', 'in_list')]),
@@ -126,7 +133,7 @@ def create_rs_qc(subjectlist):
                 (ds_rs, calc_fd, [('motpars', 'realignment_parameters_file')]),
                 (ds_rs, bigplot, [('func', 'func')]),
                 (ds_rs, bigplot, [('dvars', 'dvars')]),
-                (calc_fd, bigplot, [('FD_power', 'fd')]),
+                (calc_fd, bigplot, [('fn', 'fd')]),#FD_power
                 (ds_rs, outliers, [('func', 'in_file')]),
                 (ds_rs, outliers, [('brainmask', 'mask')]),
                 (outliers, bigplot, [('out_file', 'outliers')]),
@@ -145,15 +152,15 @@ def create_rs_qc(subjectlist):
     return qc
 
 
-df=pd.read_table('/data/p_life_raw/scripts/Followup/all_life_scans_2021.txt',header=None)
+df=pd.read_table('/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/resting/qa_pipeline/diffres.txt',header=None)
 
 subj=df[0].values
+
 #rerun dvars: LI0057625X
 #errors: LI01530759
-
 subj_cleaned=np.delete(subj, [np.where(subj == 'LI01530759'), np.where(subj== 'LI0057625X') ])
 
-#subj=(['LI0055863X'])
+#subj=(['LI02405454'])
 qc=create_rs_qc(subj_cleaned)
 qc.run()    
    
