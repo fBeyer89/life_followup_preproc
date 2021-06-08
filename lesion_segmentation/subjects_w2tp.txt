@@ -1,0 +1,3 @@
+/data/pt_life/LIFE_fu/lesionsegmentation/test/sub-6B29406750
+/data/pt_life/LIFE_fu/lesionsegmentation/test/sub-3A8A05B5BD
+/data/pt_life/LIFE_fu/lesionsegmentation/test/sub-305DAA97CA

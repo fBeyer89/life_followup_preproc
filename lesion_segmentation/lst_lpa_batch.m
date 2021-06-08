@@ -1,3 +1,6 @@
+addpath("/data/u_fbeyer_software/spm-fbeyer")
+
+
 % List of open inputs
 nrun = 1; % enter the number of runs here
 jobfile = {'/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/lesion_segmentation/lst_lpa_batch_job.m'};
