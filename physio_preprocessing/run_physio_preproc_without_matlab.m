@@ -4,7 +4,7 @@ addpath(genpath('/data/u_fbeyer_software/spm-fbeyer'))
 
 
 %Specify variables
-subjects_file='/data/pt_life_restingstate_followup/Results/Summaries/qa_check2021/all_physio_data.txt';
+subjects_file='/data/gh_gr_agingandobesity_share/life_shared/Results/External_coops/PV240_Dagher_Scholz_headmotion_gwas/Amendment2021/Analysis/all_data_final_30.06.21.txt';
 
 subjID = fopen(subjects_file);
 subjects=textscan(subjID,'%s');
@@ -65,7 +65,7 @@ physio_in.model.noise_rois.include=0;
 physio_in.model.movement.include=0;
 
 physio_in.ons_secs = [];
-physio_in.verbose.level = 0;
+physio_in.verbose.level = 2;
 physio_in.verbose.process_log = cell(0,1); 
                                 % stores text outputs of PhysIO Toolbox
                                 % processing, e.g. warnings about missed
@@ -73,7 +73,10 @@ physio_in.verbose.process_log = cell(0,1);
 physio_in.verbose.fig_handles = zeros(0,1);  
 
 
-for i=860:size(subjects{1},1) 
+for i=[36,137,150,442,559,885,965,597] %size(subjects{1},1) 
+    %test subjects:
+    % low FD, highRR: 36, 137, 150, 442
+    % high FD, low RR: 559, 885, 965, 597
     
     sprintf("Subject number: %i and ID: %s", i,subjects{1}{i})
 
@@ -85,7 +88,8 @@ for i=860:size(subjects{1},1)
         subjects{1}{i}=="LI0127843X"||subjects{1}{i}=="LI02692576"||subjects{1}{i}=="LI03736172"||...
         subjects{1}{i}=="LI03436577"||subjects{1}{i}=="LI03403894"||subjects{1}{i}=="LI00647018"||...
         subjects{1}{i}=="LI02478671"||subjects{1}{i}=="LI0353619X"||subjects{1}{i}=="LI02550372"||...
-        subjects{1}{i}=="LI00640890"||subjects{1}{i}=="LI00958910"||subjects{1}{i}=="LI03413232"
+        subjects{1}{i}=="LI00640890"||subjects{1}{i}=="LI00958910"||subjects{1}{i}=="LI03413232"||...
+        subjects{1}{i}=="LI02002716"
        continue
     else
     %subject dependent saving options
@@ -163,12 +167,22 @@ for i=860:size(subjects{1},1)
        %head motion
        r=physio_out.trace.resp;
        save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_resp.mat', subjects{1}{i}),'r','-v7')  	
+       rvt=physio_out.ons_secs.rvt;
+       save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_rvt.mat', subjects{1}{i}),'rvt','-v7') 
+       hr=physio_out.ons_secs.hr;
+       save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_hr.mat', subjects{1}{i}),'hr','-v7')
        c=physio_out.trace.oxy; 
        save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_oxy.mat', subjects{1}{i}),'c','-v7') 
        
        %save physio params in separate text file
        phys_params=[resp,mean(ons_secs.hr)];
-       save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_RVT_RR_HR.txt', subjects{1}{i}),'phys_params', '-ascii', '-double', '-tabs');  	
+       save(sprintf('/data/pt_life_restingstate_followup/Data/physio/%s_RVT_RR_HR.txt', subjects{1}{i}),'phys_params', '-ascii', '-double', '-tabs');  
+	
+    else
+        fileID = fopen('/data/pt_life_restingstate_followup/Data/physio/missing.txt','a');
+        fprintf(fileID,'%s\n',subjects{1}{i});
+        fclose(fileID);
+        %save(sprintf('/data/pt_life_restingstate_followup/Data/physio/missing.txt', subjects{1}{i}, 'append', '-ascii')
     end
     end
 

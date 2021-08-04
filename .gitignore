@@ -2,8 +2,16 @@ nipy1.4/crash*
 .Rhistory
 qa/resting/__pycache__/*
 qa/extraQA/__pycache__/*
+qa/resting/qa_pipeline/*.txt
 nipy1.4/conf_files
 nipy1.4/conf*
 nipy1.4/*/*.pyc
 nipy1.4/.idea/*
 */*check*
+lesion_segmentation/longitudinal/long_script_*.m
+lesion_segmentation/longitudinal/LST_log*.txt
+lesion_segmentation/longitudinal/*.txt
+lesion_segmentation/longitudinal/all_to_run_*
+lesion_segmentation/cross-sectional/*.txt
+lesion_segmentation/cross-sectional/*.m
+

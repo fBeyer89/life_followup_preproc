@@ -12,6 +12,7 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.afni as afni
 import nipype.interfaces.utility as util
 import nipype.interfaces.io as nio    
+from nipype.algorithms.confounds import FramewiseDisplacement
 from utils import make_the_plot, calc_frame_displacement, get_aseg, plot_fft
 import numpy as np 
 import nibabel as nb
@@ -38,7 +39,7 @@ def create_rs_qc(subjectlist):
     qc = Workflow(name="qc")
     qc.base_dir = working_dir + '/' 
     qc.config['execution']['crashdump_dir'] = qc.base_dir + "/crash_files"
-    
+    qc.config['execution']={'hash_method':'content'}
     #first get all data needed
     identitynode = Node(util.IdentityInterface(fields=['subject']),
                     name='identitynode')
@@ -91,7 +92,7 @@ def create_rs_qc(subjectlist):
         name = 'downsample')
         
     
-    
+    calc_fd_official=Node(FramewiseDisplacement(parameter_source='FSL'), name='calc_fd_official')
     
     calc_fd = Node(util.Function(
             input_names=['realignment_parameters_file', 'parameter_source'],
@@ -131,6 +132,7 @@ def create_rs_qc(subjectlist):
                 (ds_rs, downsample, [('func', 'master')]),
                 (downsample, bigplot, [('out_file', 'seg')]),
                 (ds_rs, calc_fd, [('motpars', 'realignment_parameters_file')]),
+		(ds_rs, calc_fd_official, [('motpars','in_file')]),
                 (ds_rs, bigplot, [('func', 'func')]),
                 (ds_rs, bigplot, [('dvars', 'dvars')]),
                 (calc_fd, bigplot, [('fn', 'fd')]),#FD_power
@@ -141,7 +143,8 @@ def create_rs_qc(subjectlist):
                 (bigplot, fftplot, [('dataframe', 'fn_pd')]),
                 (bigplot, datasink, [('dataframe', 'detailedQA.metrics.@dataframe')]),
                 (fftplot, datasink, [('fn', 'detailedQA.@fftplot')]),
-                (calc_fd, datasink, [('fn', 'detailedQA.metrics.@fd')])
+                (calc_fd, datasink, [('fn', 'detailedQA.metrics.@fd')]),
+		(calc_fd_official, datasink, [('out_file', 'detailedQA.metrics.@fd_official')])
                 ])    
 
 
@@ -152,18 +155,20 @@ def create_rs_qc(subjectlist):
     return qc
 
 
-df=pd.read_table('/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/resting/qa_pipeline/diffres.txt',header=None)
+df=pd.read_table('/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/qa/resting/qa_pipeline/all_for_rerun_qa_test.txt',header=None)
 
 subj=df[0].values
+print(subj)
 
 #rerun dvars: LI0057625X
 #errors: LI01530759
-subj_cleaned=np.delete(subj, [np.where(subj == 'LI01530759'), np.where(subj== 'LI0057625X') ])
+#subj_cleaned=np.delete(subj, [np.where(subj == 'LI01530759'), np.where(subj== 'LI0057625X') ])
 
-#subj=(['LI02405454'])
-qc=create_rs_qc(subj_cleaned)
+subj=(['LI02554637','LI01213470','LI00807691','LI0067249X', 'LI00272497', 'LI02373153', 'LI03398139', 'LI02657370'])
+qc=create_rs_qc(subj)
 qc.run()    
    
+
 
 
 

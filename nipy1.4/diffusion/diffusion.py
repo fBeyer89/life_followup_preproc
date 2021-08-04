@@ -73,12 +73,6 @@ def create_dti():
     '''
     distor_corr = create_distortion_correct()
 
-    #''
-    ## upsampling #TODO: upsample with eddy directly, waiting for Alfred for the method
-    #''
-    #flirt = Node(fsl.FLIRT(), name='flirt')
-    #flirt.inputs.apply_isoxfm = 1
-    #TODO: to use this for dtifit, needed to creat another brain mask
 
     '''
     tensor fitting

@@ -121,7 +121,8 @@ def calc_frame_displacement(realignment_parameters_file, parameter_source):
         translations = np.transpose(np.abs(np.diff(cols[3:6, :])))
         rotations = np.transpose(np.abs(np.diff(cols[0:3, :])))
 
-    FD_power = np.sum(translations, axis = 1) + (50*3.141/180)*np.sum(rotations, axis =1)
+    FD_power = np.sum(translations, axis = 1) + 50*np.sum(rotations, axis =1)
+    #as rotations are in radians for FSL, and rad*radius=arc length
 
     #FD is zero for the first time point
     FD_power = np.insert(FD_power, 0, 0)
@@ -167,7 +168,17 @@ def make_the_plot(func, seg, tr, fd_thres, outliers, dvars, fd, subj, outfile):
         r=resp.get('r')
         r=r.flatten()
         r=r[4:]
+        resp=sio.loadmat('/data/pt_life_restingstate_followup/Data/physio/%s_rvt.mat' %(subj))
+        rvt=resp.get('rvt')
+        rvt=rvt.flatten()
+        rvt=rvt[4:]
+        heart=sio.loadmat('/data/pt_life_restingstate_followup/Data/physio/%s_hr.mat' %(subj))
+        hr=heart.get('hr')
+        hr=hr.flatten()
+        hr=hr[4:]
         dataframe['resp']=r.tolist()
+        dataframe['RVT']=rvt.tolist()
+        dataframe['HR']=hr.tolist()
     
     fn_pd=os.getcwd()+'/confounds.csv'
     dataframe.to_csv(fn_pd, sep=',',index_col=False)

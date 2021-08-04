@@ -206,6 +206,14 @@ class NiiWranglerInputSpec(BaseInterfaceInputSpec):
             mandatory=True,
             desc="a list of nifti files to be categorized, matched up, etc.",
             copyfile=False)
+    bvals = InputMultiPath(
+            traits.Either(traits.List(File(exists=True)),File(exists=True)),
+            mandatory=True,desc="a list or single file name of bvals",
+            copyfile=False)
+    bvecs = InputMultiPath(
+            traits.Either(traits.List(File(exists=True)),File(exists=True)),
+            mandatory=True,desc="a list or single file name of bvecs",
+            copyfile=False)
     series_map = traits.Dict(
             key_trait=traits.Str(),
             value_trait=traits.List(),
@@ -263,6 +271,8 @@ class NiiWranglerOutputSpec(TraitedSpec):
     dwi_pa  = traits.List(traits.Str(),
             mandatory=True,
             desc="dwi pa nifti for topup (list in chronological order  if repeated).")
+    bvals   = traits.File(exists=True)
+    bvecs   = traits.File(exists=True)
     flair   = traits.List(traits.Str(),
             mandatory=True,
             desc="flair nifti (list in chronological order  if repeated).")
@@ -317,8 +327,8 @@ class NiiWrangler(BaseInterface):
         self.flair_files = []
         self.fieldmap_mag = []
         self.fieldmap_ph = []
-        self.bval = []
-        self.bvec = []
+        self.bvals = []
+        self.bvecs = []
         self.ep_TR= None
         self.fieldmap_mag_delta_te = "NONE"
         self.t1_sample_spacing = 0.
@@ -331,13 +341,23 @@ class NiiWrangler(BaseInterface):
         import re
         import operator
         
+        print "first check bvals/bvecs"
+        if len(self.inputs.bvals)>1:
+		self.bvals=self.inputs.bvals[-1]
+		self.bvecs=self.inputs.bvecs[-1]
+	else:
+		self.bvals=self.inputs.bvals[0]
+		self.bvecs=self.inputs.bvecs[0]
+
+
+
         print "starting NII wrangler"
         nii_files = self.inputs.nii_files
         smap = self.inputs.series_map
         dinfo = self.inputs.dicom_info
 
-	    #print nii_files
-	    #print dinfo
+	#print nii_files
+	#print dinfo
         #block_averaging = self.inputs.block_struct_averaging
         #s_num_reg = re.compile(".*s(\d+)a(?!.*/)") # for dcm2nii output
         s_num_reg = re.compile(".*s(\d+)") #for dcm2niix output
@@ -471,7 +491,11 @@ class NiiWrangler(BaseInterface):
             
         ep_dwi_echo_fail = False
         if len(dwi)>1:
-            print "more than one dwi scan"
+            print "more than one dwi scan, default to use last (potentially improved) scan"
+            self.dwi_files=list([self.dwi_files[-1]])
+            self.dwi_ap_files=list([self.dwi_ap_files[-1]])
+            self.dwi_pa_files=list([self.dwi_pa_files[-1]])
+
             if isdefined(self.inputs.ep_dwi_echo_spacings):
                 self.ep_dwi_echo_spacings = [self.inputs.ep_dwi_echo_spacings for n in self.dwi_files]
             elif bs and any(["bw_per_pix_phase_encode" in d and "acq_matrix_n" in d for d in dwi]):
@@ -479,6 +503,7 @@ class NiiWrangler(BaseInterface):
                     ep_dwi_echo_fail = True
                 else:
                     self.ep_dwi_echo_spacings = [1/(d["bw_per_pix_phase_encode"] * d["acq_matrix_n"]) for d in dwi]
+		    self.ep_dwi_echo_spacings=self.ep_dwi_echo_spacings[-1]
             else:
                 self.ep_dwi_echo_spacings = ["NONE" for n in self.dwi_files]       
         else:
@@ -542,6 +567,8 @@ class NiiWrangler(BaseInterface):
         outputs["dwi"] = self.dwi_files
         outputs["dwi_ap"] = self.dwi_ap_files
         outputs["dwi_pa"] = self.dwi_pa_files
+	outputs["bvals"]=self.bvals
+	outputs["bvecs"]=self.bvecs
         outputs["flair"] = self.flair_files
         fm = self.fieldmap_mag
         fp = self.fieldmap_ph

@@ -7,28 +7,39 @@ addpath("/data/u_fbeyer_software/spm-fbeyer")
 spm('Defaults','fMRI');
 clear matlabbatch
 
-data_path = '/data/pt_life/LIFE_fu/lesionsegmentation/test/';
+data_path = '/data/pt_life_whm/Data/LST/';
 
 %% Load data
 % We have to loop over participants as each batch instance only takes
 % one participant (with two timepoints)
-pfile="/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/lesion_segmentation/subjects_w2tp.txt";
-C = readcell(pfile);
 
+fu = spm_select('FPListRec', fullfile(data_path), '^ples\w*(?=fu\.).*nii$'); 
 
-for i = 1:length(C(:,7))
-char(C(i,7))
-clear matlabbatch
-
-f = spm_select('FPList', fullfile(data_path, char(C(i,7))), '^ples_*'); 
-f
-
-matlabbatch{1}.spm.tools.LST.long.data_long_tmp = {cellstr(f)};
-matlabbatch{1}.spm.tools.LST.long.html_report = 0;
-
-spm_jobman('run', matlabbatch);
-
+fid = fopen('all_to_run_19.7','wt');
+for rows = 1:size(fu)
+fprintf(fid,'%s\n',fu(rows,:));
 end
+fclose(fid)
+
+%fu_cs=cellstr(fu);
+
+%run only those who have been run completely until here.
+
+%bl_cs = strrep(fu_cs(103:150,:),'_fu','_bl');%only use those with followup MRI, and modify the path to change to baseline
+
+
+%{bl_cs,fu_cs(103:150,:)}
+
+
+
+%matlabbatch{1}.spm.tools.LST.long.data_long_tmp = {bl_cs,fu_cs(103:150,:)};
+%matlabbatch{1}.spm.tools.LST.long.html_report = 0;
+
+%spm_jobman('run', matlabbatch);
+
+
+
+
 
 
 

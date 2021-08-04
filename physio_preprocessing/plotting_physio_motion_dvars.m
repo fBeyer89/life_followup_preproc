@@ -5,13 +5,13 @@ addpath(genpath('/data/pt_life/data_fbeyer/spm-fbeyer'))
 %create physio_in file
 %Specify variables
 subjects_file='/data/pt_life_restingstate_followup/Results/Summaries/qa_check2021/all_physio_data.txt';
-%'/data/pt_life/data_fbeyer/genetics/analysis/young_and_old/connectome_project/old/794subjects.txt'
 
 subjID = fopen(subjects_file);
 subjects=textscan(subjID,'%s');
 
 all_res=zeros(size(subjects{1},1),15);
 subjects={"LI05095916"}
+
 for i=1:1%size(subjects{1},1)
     
     %if subjects{1}{i}=="LI01273319"%for looking at plots of individual subjects
