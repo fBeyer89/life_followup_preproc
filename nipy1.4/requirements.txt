@@ -5,7 +5,7 @@ Click==7.0
 cloudpickle==1.1.1
 configobj==5.0.4
 configparser==3.5.0
-cvxopt==1.1.8
+cvxopt==1.2.7
 cycler==0.10.0
 dask==1.2.2
 decorator==4.4.0
