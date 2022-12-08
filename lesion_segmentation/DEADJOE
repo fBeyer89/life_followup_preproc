@@ -1,0 +1,12 @@
+
+*** These modified files were found in JOE when it aborted on Wed Oct 27 13:13:32 2021
+*** JOE was aborted by UNIX signal 1
+
+*** File '(Unnamed)'
+/data/gh_gr_agingandobesity_share/life_shared/Analysis/MRI/LIFE_followup/preprocessing/lesion_segmentation/copy_flair_data.sh
+
+*** File '* Startup Log *'
+Processing '/etc/joe/joerc'...
+Processing '/etc/joe/ftyperc'...
+Finished processing /etc/joe/ftyperc
+Finished processing /etc/joe/joerc

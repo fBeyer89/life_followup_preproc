@@ -1,4 +1,5 @@
 #copy LIFE FLAIR scans from baseline and followup to working directory
+#bl refers to first scan of the participant (14 pilot and main participants are thus included with their first measurement)
 
 cd /data/p_life_raw/bids
 
@@ -7,9 +8,16 @@ mkdir -p $wd
 
 #test subjects: sub-A0038A0EFA sub-C12CCEE126 sub-DF34687255
 
-for subj in sub-25F8C1CF3C sub-4213544E08 sub-A8A6D338E1 sub-980D7F1B46 sub-E738D58064 sub-15E7897CDD sub-43F7100A14 sub-B687779C12 sub-E134854A4F sub-3173B5B579 sub-9B2B6BC54C sub-FD77D1769B sub-FADB02A98A sub-74A8D1F7CB sub-A1278A222B sub-2989DF8D49 sub-4ED46EC3FF sub-E3AC41E17E sub-BA42AAEFDC sub-82CDD7A624 #`ls -d sub-*`
+for subj in sub-63D31D6C5D sub-7518497768 sub-D3F3921BEE sub-C15A19C13C sub-1C091C313C sub-2E53F0E601 sub-982AAD8304 sub-D593494506 sub-1F861C7B0F sub-10F692D5C2 sub-3C2A21C6F3 sub-44F328348E sub-5A9AA93753 sub-EB7CA9564F sub-467E0799FF sub-EBFABDDF77 sub-D7EB919BFA
+ #`ls -d sub-*`
 do 
-for tp in fu
+
+gunzip $wd/$subj/FLAIR_bl.nii.gz
+rm -rf $wd/$subj/ples_lpa_mFLAIR_bl_thr0.8_bin.nii.gz
+gunzip $wd/$subj/ples_lpa_mFLAIR_bl.nii.gz
+gunzip $wd/$subj/mFLAIR_bl.nii.gz
+
+for tp in bl fu
 do
 echo "Subject: $subj at timepoint $tp"
 
@@ -28,6 +36,8 @@ fi
 else 
 echo "not acquired or already converted"
 fi
+
+
 
 
 #if [ -f $wd/$subj/FLAIR_bl.nii ] && [ -f $wd/$subj/FLAIR_fu.nii ];
